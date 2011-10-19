@@ -70,7 +70,7 @@
 
 	NSString *version = [infoDictionary objectForKey:@"CFBundleVersion"];
 
-	self.title = [NSString stringWithFormat:@"%@ v%@", name, version];
+	self.title = [NSString stringWithFormat:@"%@", name];
 
 	CGSize viewSize = self.view.bounds.size;
 
