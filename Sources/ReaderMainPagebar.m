@@ -171,8 +171,8 @@
 		self.backgroundColor = [UIColor clearColor];
 
 		CAGradientLayer *layer = (CAGradientLayer *)self.layer;
-		CGColorRef liteColor = [UIColor colorWithWhite:0.82f alpha:0.8f].CGColor;
-		CGColorRef darkColor = [UIColor colorWithWhite:0.32f alpha:0.8f].CGColor;
+		CGColorRef liteColor = [UIColor colorWithWhite:0.82f alpha:0.2f].CGColor;
+		CGColorRef darkColor = [UIColor colorWithWhite:0.32f alpha:0.2f].CGColor;
 		layer.colors = [NSArray arrayWithObjects:(id)liteColor, (id)darkColor, nil];
 
 		CGRect shadowRect = self.bounds; shadowRect.size.height = 4.0f; shadowRect.origin.y -= shadowRect.size.height;
@@ -315,11 +315,11 @@
 
 #if (READER_SLIDER == TRUE)
     CGFloat width = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP) * pages;
-    NSLog(@"init width is %lf",width);
+
     if (width < self.bounds.size.width) {
         width = self.bounds.size.width;
     }
-    NSLog(@"mew width is %lf",width);
+
     scrollView.contentSize = CGSizeMake(width, controlRect.size.height);
 #else
 	trackControl.frame = controlRect; // Update track control frame
@@ -387,8 +387,6 @@
 			UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:thumbRequest priority:NO]; // Request the thumb
 
 			if ([image isKindOfClass:[UIImage class]]) [smallThumbView showImage:image]; // Use thumb image from cache
-
-            NSLog(@"added %d",page);
             
 #if (READER_SLIDER == TRUE)
             [scrollView addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
@@ -643,8 +641,6 @@
     NSLog(@"%s", __FUNCTION__);
 #endif
    
-    NSLog(@"handling touch");
-      
     if (recognizer.state == UIGestureRecognizerStateRecognized) // Handle the tap
     {
         CGPoint point = [recognizer locationInView:recognizer.view]; // Tap location
@@ -678,7 +674,7 @@
     NSLog(@"%s", __FUNCTION__);
 #endif
     
-    CGRect newFrame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+    CGRect newFrame = CGRectMake(0, THUMB_SMALL_GAP, frame.size.width, frame.size.height);
     
     if ((self = [super initWithFrame:newFrame]))
     {
