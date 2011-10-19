@@ -178,9 +178,19 @@
 	NSLog(@"%s (%d)", __FUNCTION__, interfaceOrientation);
 #endif
 
-	if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) // See README
-		return UIInterfaceOrientationIsPortrait(interfaceOrientation);
-	else
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) // See README
+    {
+        float version = [[[UIDevice currentDevice] systemVersion] floatValue];
+        if (version >= READER_MIN_IOS_TO_ROTATE_IPHONE)
+        {
+            return YES;
+        }
+        else
+        {
+            return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+        }
+	}
+    else
 		return YES;
 }
 

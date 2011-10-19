@@ -21,5 +21,9 @@
 #define READER_DISABLE_IDLE FALSE
 #define READER_SHOW_SHADOWS TRUE
 #define READER_STANDALONE FALSE
+#define READER_SLIDER TRUE
+#define READER_MIN_IOS_TO_ROTATE_IPHONE 5.0f
+
+
 
 extern NSString *const kReaderCopyrightNotice;
