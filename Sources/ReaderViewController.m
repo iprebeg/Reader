@@ -24,9 +24,14 @@
 #define PAGING_VIEWS 3
 
 #define TOOLBAR_HEIGHT 44.0f
-#define PAGEBAR_HEIGHT 48.0f
 
+#if (READER_SLIDER == TRUE)
+#define PAGEBAR_HEIGHT 100.0f
+#define TAP_AREA_SIZE 100.0f
+#else
+#define PAGEBAR_HEIGHT 48.0f
 #define TAP_AREA_SIZE 48.0f
+#endif
 
 #pragma mark Properties
 

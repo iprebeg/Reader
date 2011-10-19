@@ -15,11 +15,15 @@
 #import <UIKit/UIKit.h>
 
 #import "ReaderThumbView.h"
+#import "ReaderConstants.h"
 
 @class ReaderMainPagebar;
+@class ReaderPreview;
 @class ReaderTrackControl;
 @class ReaderPagebarThumb;
 @class ReaderDocument;
+
+
 
 @protocol ReaderMainPagebarDelegate <NSObject>
 
@@ -35,8 +39,12 @@
 
 	ReaderDocument *document;
 
+#if (READER_SLIDER == TRUE)
+    ReaderPreview *scrollView;
+#else
 	ReaderTrackControl *trackControl;
-
+#endif
+    
 	NSMutableDictionary *miniThumbViews;
 
 	ReaderPagebarThumb *pageThumbView;
@@ -57,6 +65,20 @@
 
 - (void)hidePagebar;
 - (void)showPagebar;
+
+@end
+
+
+#pragma mark -
+
+//
+//  ReaderPreview class interface
+//
+@interface ReaderPreview : UIScrollView
+<UIScrollViewDelegate, UIGestureRecognizerDelegate>
+{
+@private
+}
 
 @end
 
