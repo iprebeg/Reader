@@ -79,17 +79,19 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
     
-#if (READER_SLIDER == TRUE)
-    ReaderPagebarThumb *thumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
     
-    CGPoint point = [thumb center];
+	NSInteger pages = [document.pageCount integerValue];
+    
+#if (READER_SLIDER == TRUE)
+    ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
+    
+    CGPoint point = [tthumb center];
     point.y = 0; 
     point.x = point.x - (self.frame.size.width / 2);
     
     [scrollView setContentOffset:point animated:YES];
 #endif
-    
-	NSInteger pages = [document.pageCount integerValue];
+
 
 	if (pages > 1) // Only update frame if more than one page
 	{
@@ -127,6 +129,8 @@
 		UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
 
 		UIImage *thumb = ([image isKindOfClass:[UIImage class]] ? image : nil); [pageThumbView showImage:thumb];
+        
+
 	}
 }
 
@@ -294,9 +298,9 @@
     NSInteger pages = [document.pageCount integerValue]; // Pages
     
 #if (READER_SLIDER == TRUE)
-    NSInteger thumbs = (controlRect.size.width / thumbWidth);
-#else
     NSInteger thumbs = pages;
+#else
+    NSInteger thumbs = (controlRect.size.width / thumbWidth);
 #endif
     
 	if (thumbs > pages) thumbs = pages; // No more than total pages
@@ -310,7 +314,13 @@
 	NSInteger X = (widthDelta / 2.0f); controlRect.origin.x = X;
 
 #if (READER_SLIDER == TRUE)
-    scrollView.contentSize = CGSizeMake((THUMB_SMALL_WIDTH + THUMB_SMALL_GAP) * pages, controlRect.size.height);
+    CGFloat width = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP) * pages;
+    NSLog(@"init width is %lf",width);
+    if (width < self.bounds.size.width) {
+        width = self.bounds.size.width;
+    }
+    NSLog(@"mew width is %lf",width);
+    scrollView.contentSize = CGSizeMake(width, controlRect.size.height);
 #else
 	trackControl.frame = controlRect; // Update track control frame
 #endif
@@ -607,7 +617,6 @@
 	trackView.tag = 0; // Reset page tracking
 }
 
-#if (READER_SLIDER == TRUE)
 
 - (ReaderPagebarThumb *)thumbCellContainingPoint:(CGPoint)point
 {
@@ -641,12 +650,12 @@
         CGPoint point = [recognizer locationInView:recognizer.view]; // Tap location
         ReaderThumbView *tvCell = [self thumbCellContainingPoint:point]; // Look for cell
         
+        
         if (tvCell != nil) //[delegate thumbsView:self didSelectThumbWithIndex:tvCell.tag];
             [delegate pagebar:self gotoPage:tvCell.tag];
-        }
+    }
 }
 
-#endif
 
 @end
 

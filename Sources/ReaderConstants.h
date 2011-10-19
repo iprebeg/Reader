@@ -24,6 +24,6 @@
 #define READER_SLIDER TRUE
 #define READER_MIN_IOS_TO_ROTATE_IPHONE 5.0f
 
-
+#define DEBUGX
 
 extern NSString *const kReaderCopyrightNotice;
