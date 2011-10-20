@@ -87,8 +87,18 @@
 	tapLabel.autoresizingMask |= UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 	tapLabel.center = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
 
-	[self.view addSubview:tapLabel]; [tapLabel release];
+	//[self.view addSubview:tapLabel]; [tapLabel release];
 
+    UIImage *splashImage = [UIImage imageNamed:@"Default"];
+    CGRect rect = CGRectMake(0, 0, splashImage.size.width, splashImage.size.height);
+    UIImageView *splashView = [[UIImageView alloc] initWithFrame:rect];
+    splashView.image = splashImage;
+    splashView.center = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
+    splashView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+	splashView.autoresizingMask |= UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+
+    [self.view addSubview:splashView]; [splashView release];
+    
 	UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
 	//singleTap.numberOfTouchesRequired = 1; singleTap.numberOfTapsRequired = 1; //singleTap.delegate = self;
 	[self.view addGestureRecognizer:singleTap]; [singleTap release];
