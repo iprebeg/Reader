@@ -90,7 +90,7 @@
 	//[self.view addSubview:tapLabel]; [tapLabel release];
 
     UIImage *splashImage = [UIImage imageNamed:@"Splash"];
-    CGRect rect = CGRectMake(0, 0, splashImage.size.width, splashImage.size.height);
+    CGRect rect = CGRectMake(0, 0, splashImage.size.width / 2.0f, splashImage.size.height / 2.0f);
     UIImageView *splashView = [[UIImageView alloc] initWithFrame:rect];
     splashView.image = splashImage;
     splashView.center = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
