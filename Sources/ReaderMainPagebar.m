@@ -85,6 +85,8 @@
 #if (READER_SLIDER == TRUE)
     ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
     
+    NSLog(@"%s:page is %d, but also %d", __FUNCTION__, page, pageThumbView.tag);
+    
     CGPoint point = [tthumb center];
     point.y = 0; 
     point.x = point.x - (self.frame.size.width / 2);
@@ -339,13 +341,19 @@
 		pageThumbView.layer.zPosition = 1.0f; // Z position so that it sits on top of the small thumbs
 
 #if (READER_SLIDER == TRUE)
+        NSInteger pageNum = [document.pageNumber integerValue];
+        
+        if (pageThumbView.tag != pageNum)
+        { 
+            [self updatePageThumbView:pageNum]; // Update page thumb view
+        }
 #else
 		[trackControl addSubview:pageThumbView]; // Add as the first subview of the track control
+        [self updatePageThumbView:pageNum]; // Update page thumb view
 #endif
 	}
 
-	[self updatePageThumbView:[document.pageNumber integerValue]]; // Update page thumb view
-
+       
 	NSInteger strideThumbs = (thumbs - 1); if (strideThumbs < 1) strideThumbs = 1;
 
 	CGFloat stride = ((CGFloat)pages / (CGFloat)strideThumbs); // Page stride
@@ -423,9 +431,9 @@
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
 #endif
-
+    
 	NSInteger page = [document.pageNumber integerValue]; // #
-
+    
 	[self updatePageNumberText:page]; // Update page number text
 
 	[self updatePageThumbView:page]; // Update page thumb view
@@ -560,7 +568,7 @@
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
 #endif
-
+    
 	NSInteger page = [self trackViewPageNumber:trackView]; // Page
 
 	if (page != [document.pageNumber integerValue]) // Only if different
@@ -645,7 +653,6 @@
     {
         CGPoint point = [recognizer locationInView:recognizer.view]; // Tap location
         ReaderThumbView *tvCell = [self thumbCellContainingPoint:point]; // Look for cell
-        
         
         if (tvCell != nil) //[delegate thumbsView:self didSelectThumbWithIndex:tvCell.tag];
             [delegate pagebar:self gotoPage:tvCell.tag];
