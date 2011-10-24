@@ -111,6 +111,8 @@
 }
 
 - (id)initWithFrame:(CGRect)frame small:(BOOL)small;
+- (void)makeTransparent;
+- (void)makeOpaque;
 
 @end
 

@@ -25,12 +25,17 @@
 
 #if (READER_SLIDER == TRUE)
 #define THUMB_FRAC 1.7036688617121354f
-#define THUMB_SMALL_GAP 5
-#define THUMB_SMALL_WIDTH 140
-#define THUMB_SMALL_HEIGHT (THUMB_SMALL_WIDTH / THUMB_FRAC )
+#define THUMB_SMALL_GAP 3
+#define THUMB_SMALL_WIDTH_PAD 212 //140
+#define THUMB_SMALL_HEIGHT_PAD (THUMB_SMALL_WIDTH / THUMB_FRAC )
+
+#define THUMB_SMALL_WIDTH_PHONE 80 //140
+#define THUMB_SMALL_HEIGHT_PHONE (THUMB_SMALL_WIDTH / THUMB_FRAC )
 
 #define THUMB_LARGE_WIDTH 150
 #define THUMB_LARGE_HEIGHT (THUMB_LARGE_WIDTH / THUMB_FRAC)
+
+
 
 #else
 
@@ -79,14 +84,11 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
     
-    
-	NSInteger pages = [document.pageCount integerValue];
-    
+    NSInteger pages = [document.pageNumber intValue];
+            
 #if (READER_SLIDER == TRUE)
     ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
-    
-    NSLog(@"%s:page is %d, but also %d", __FUNCTION__, page, pageThumbView.tag);
-    
+        
     CGPoint point = [tthumb center];
     point.y = 0; 
     point.x = point.x - (self.frame.size.width / 2);
@@ -118,8 +120,14 @@
 		}
 	}
 
+#if (READER_SLIDER == TRUE)
+    ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:pageThumbView.tag]];
+    [oldthumb makeTransparent];
+    [tthumb makeOpaque];
+#endif
+
 	if (page != pageThumbView.tag) // Only if page number changed
-	{
+	{        
 		pageThumbView.tag = page; [pageThumbView reuse]; // Reuse the thumb view
 
 		CGSize size = CGSizeMake(THUMB_LARGE_WIDTH, THUMB_LARGE_HEIGHT); // Maximum thumb size
@@ -292,7 +300,12 @@
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
 #endif
-
+    
+#if (READER_SLIDER == TRUE)
+    float THUMB_SMALL_WIDTH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_WIDTH_PHONE : THUMB_SMALL_WIDTH_PAD;
+    float THUMB_SMALL_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_HEIGHT_PHONE : THUMB_SMALL_HEIGHT_PAD;
+#endif
+    
 	CGRect controlRect = CGRectInset(self.bounds, 4.0f, 0.0f);
 
 	CGFloat thumbWidth = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
@@ -329,7 +342,7 @@
     
     
 	if (pageThumbView == nil) // Create the page thumb view when needed
-	{
+	{        
 		CGFloat heightDelta = (controlRect.size.height - THUMB_LARGE_HEIGHT);
 
 		NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Thumb X, Y
@@ -340,9 +353,9 @@
 
 		pageThumbView.layer.zPosition = 1.0f; // Z position so that it sits on top of the small thumbs
 
-#if (READER_SLIDER == TRUE)
         NSInteger pageNum = [document.pageNumber integerValue];
-        
+
+#if (READER_SLIDER == TRUE)        
         if (pageThumbView.tag != pageNum)
         { 
             [self updatePageThumbView:pageNum]; // Update page thumb view
@@ -376,7 +389,7 @@
 		NSNumber *key = [NSNumber numberWithInteger:page]; // Page number key for thumb view
 
 		ReaderPagebarThumb *smallThumbView = [miniThumbViews objectForKey:key]; // Thumb view
-        
+                
 #if (READER_SLIDER == TRUE)
         CGFloat yOrigin = thumb * (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
         CGRect thumbRect = CGRectMake(yOrigin, 0, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
@@ -414,7 +427,7 @@
 				smallThumbView.frame = thumbRect; // Update thumb frame
 			}
 		}
-
+        
 		thumbRect.origin.x += thumbWidth; // Next thumb X position
 	}
 
@@ -655,7 +668,9 @@
         ReaderThumbView *tvCell = [self thumbCellContainingPoint:point]; // Look for cell
         
         if (tvCell != nil) //[delegate thumbsView:self didSelectThumbWithIndex:tvCell.tag];
+        {   
             [delegate pagebar:self gotoPage:tvCell.tag];
+        }
     }
 }
 
@@ -857,6 +872,25 @@
 	}
 
 	return self;
+}
+
+- (void)makeTransparent;
+{
+#ifdef DEBUGX
+	NSLog(@"%s", __FUNCTION__);
+#endif
+
+    imageView.alpha = 0.5f;
+}
+
+- (void)makeOpaque
+{
+#ifdef DEBUGX
+	NSLog(@"%s", __FUNCTION__);
+#endif
+    
+    imageView.alpha = 1.0f;
+
 }
 
 - (void)dealloc
