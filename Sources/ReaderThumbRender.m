@@ -29,6 +29,7 @@
 #import "CGPDFDocument.h"
 
 #import <ImageIO/ImageIO.h>
+#import "UIImage+Resize.h"
 
 @implementation ReaderThumbRender
 
@@ -199,6 +200,8 @@
 			ReaderThumbView *thumbView = request.thumbView; // Target thumb view for image show
 
 			NSUInteger targetTag = request.targetTag; // Target reference tag for image show
+
+            image = [image scaleProportionalToSize:request.thumbSize];
 
 			dispatch_async(dispatch_get_main_queue(), // Queue image show on main thread
 			^{

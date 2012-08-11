@@ -337,7 +337,10 @@
     
     viewRect.size.height -= PAGEBAR_HEIGHT;
     
-	theScrollView = [[UIScrollView alloc] initWithFrame:viewRect]; // All
+    CGRect notFullRect = self.view.bounds;
+    notFullRect.size.height -= PAGEBAR_HEIGHT + TOOLBAR_HEIGHT;
+    notFullRect.origin.y = TOOLBAR_HEIGHT;
+    theScrollView = [[UIScrollView alloc] initWithFrame:notFullRect]; // All
 
 	theScrollView.scrollsToTop = NO;
 	theScrollView.pagingEnabled = YES;
@@ -622,7 +625,8 @@
 #endif
 
     CGRect notFullRect = self.view.bounds;
-    notFullRect.size.height -= PAGEBAR_HEIGHT;
+    notFullRect.size.height -= PAGEBAR_HEIGHT + TOOLBAR_HEIGHT;
+    notFullRect.origin.y = TOOLBAR_HEIGHT;
     //[theScrollView initWithFrame:notFullRect];
     theScrollView.frame = notFullRect;
 }

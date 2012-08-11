@@ -29,6 +29,7 @@
 #import "ReaderThumbView.h"
 
 #import <ImageIO/ImageIO.h>
+#import "UIImage+Resize.h"
 
 @implementation ReaderThumbFetch
 

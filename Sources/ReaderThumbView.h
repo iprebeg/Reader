@@ -37,6 +37,7 @@
 
 	UIImageView *imageView;
 }
+@property (nonatomic, retain) UIImageView *imageView;
 
 @property (assign, readwrite) NSOperation *operation;
 
@@ -47,5 +48,7 @@
 - (void)showTouched:(BOOL)touched;
 
 - (void)reuse;
+
+- (void)setImageViewContentMode:(UIViewContentMode)contentMode;
 
 @end

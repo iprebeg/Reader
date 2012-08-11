@@ -31,6 +31,7 @@
 
 @synthesize operation = _operation;
 @synthesize targetTag = _targetTag;
+@synthesize imageView;
 
 #pragma mark ReaderThumbView instance methods
 
@@ -54,7 +55,7 @@
 		imageView.userInteractionEnabled = NO;
 		imageView.contentMode = UIViewContentModeScaleAspectFit;
 		imageView.autoresizingMask = UIViewAutoresizingNone;
-		//imageView.backgroundColor = [UIColor clearColor];
+		imageView.backgroundColor = [UIColor clearColor];
 
 		[self addSubview:imageView];
 	}
@@ -113,6 +114,11 @@
 	[self.operation cancel], self.operation = nil;
 
 	imageView.image = nil; // Release image
+}
+
+- (void)setImageViewContentMode:(UIViewContentMode)contentMode
+{
+    imageView.contentMode = contentMode;
 }
 
 @end
