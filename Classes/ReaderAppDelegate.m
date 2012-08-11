@@ -50,7 +50,7 @@
 
 	mainWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 
-	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
+//	[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 
 	readerDemoController = [[ReaderDemoController alloc] initWithNibName:nil bundle:nil]; // Demo controller
 

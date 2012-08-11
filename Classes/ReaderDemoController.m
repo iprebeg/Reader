@@ -24,7 +24,6 @@
 //
 
 #import "ReaderDemoController.h"
-#import "ReaderConstants.h"
 
 @implementation ReaderDemoController
 
@@ -81,7 +80,7 @@
 
 	NSString *version = [infoDictionary objectForKey:@"CFBundleVersion"];
 
-	self.title = [NSString stringWithFormat:@"%@", name];
+	self.title = [NSString stringWithFormat:@"%@ v%@", name, version];
 
 	CGSize viewSize = self.view.bounds.size;
 
@@ -98,18 +97,8 @@
 	tapLabel.autoresizingMask |= UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 	tapLabel.center = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
 
-	//[self.view addSubview:tapLabel]; [tapLabel release];
+	[self.view addSubview:tapLabel]; [tapLabel release];
 
-    UIImage *splashImage = [UIImage imageNamed:@"Splash"];
-    CGRect rect = CGRectMake(0, 0, splashImage.size.width / 2.0f, splashImage.size.height / 2.0f);
-    UIImageView *splashView = [[UIImageView alloc] initWithFrame:rect];
-    splashView.image = splashImage;
-    splashView.center = CGPointMake(viewSize.width / 2.0f, viewSize.height / 2.0f);
-    splashView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-	splashView.autoresizingMask |= UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-
-    [self.view addSubview:splashView]; [splashView release];
-    
 	UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
 	//singleTap.numberOfTouchesRequired = 1; singleTap.numberOfTapsRequired = 1; //singleTap.delegate = self;
 	[self.view addGestureRecognizer:singleTap]; [singleTap release];
@@ -178,22 +167,10 @@
 	NSLog(@"%s (%d)", __FUNCTION__, interfaceOrientation);
 #endif
 
-    
 	if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) // See README
-    {
-        float version = [[[UIDevice currentDevice] systemVersion] floatValue];
-        if (version >= READER_MIN_IOS_TO_ROTATE_IPHONE)
-        {
-            return YES;
-        }
-        else
-        {
-            return UIInterfaceOrientationIsPortrait(interfaceOrientation);
-        }
-	}
-    else
+		return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+	else
 		return YES;
-    
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
