@@ -1,17 +1,29 @@
 //
 //	ReaderContentPage.m
-//	Reader v2.5.0
+//	Reader v2.5.6
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
 //
-//	This work is being made available under a Creative Commons Attribution license:
-//		«http://creativecommons.org/licenses/by/3.0/»
-//	You are free to use this work and any derivatives of this work in personal and/or
-//	commercial products and projects as long as the above copyright is maintained and
-//	the original author is attributed.
+//	Permission is hereby granted, free of charge, to any person obtaining a copy
+//	of this software and associated documentation files (the "Software"), to deal
+//	in the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+//	of the Software, and to permit persons to whom the Software is furnished to
+//	do so, subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#import "ReaderConstants.h"
 #import "ReaderContentPage.h"
 #import "ReaderContentTile.h"
 #import "CGPDFDocument.h"
@@ -85,6 +97,9 @@
 		if (ll_x > ur_x) { CGPDFReal t = ll_x; ll_x = ur_x; ur_x = t; } // Normalize Xs
 		if (ll_y > ur_y) { CGPDFReal t = ll_y; ll_y = ur_y; ur_y = t; } // Normalize Ys
 
+		ll_x -= _pageOffsetX; ll_y -= _pageOffsetY; // Offset lower-left co-ordinate
+		ur_x -= _pageOffsetX; ur_y -= _pageOffsetY; // Offset upper-right co-ordinate
+
 		switch (_pageAngle) // Page rotation angle (in degrees)
 		{
 			case 90: // 90 degree page rotation
@@ -100,15 +115,15 @@
 				CGPDFReal swap;
 				swap = ll_y; ll_y = ll_x; ll_x = swap;
 				swap = ur_y; ur_y = ur_x; ur_x = swap;
-				ll_x = ((0.0f - ll_x) + _pageSize.width);
-				ur_x = ((0.0f - ur_x) + _pageSize.width);
+				ll_x = ((0.0f - ll_x) + _pageWidth);
+				ur_x = ((0.0f - ur_x) + _pageWidth);
 				break;
 			}
 
 			case 0: // 0 degree page rotation
 			{
-				ll_y = ((0.0f - ll_y) + _pageSize.height);
-				ur_y = ((0.0f - ur_y) + _pageSize.height);
+				ll_y = ((0.0f - ll_y) + _pageHeight);
+				ur_y = ((0.0f - ur_y) + _pageHeight);
 				break;
 			}
 		}
@@ -164,7 +179,7 @@
 	}
 }
 
-- (CGPDFArrayRef)findDestinationWithName:(const char *)destinationName inDestsTree:(CGPDFDictionaryRef)node
+- (CGPDFArrayRef)destinationWithName:(const char *)destinationName inDestsTree:(CGPDFDictionaryRef)node
 {
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
@@ -235,11 +250,11 @@
 		{
 			CGPDFDictionaryRef kidNode = NULL; // Kid node dictionary
 
-			if (CGPDFArrayGetDictionary(kidsArray, index, &kidNode) == true) // Recurse into kid node
+			if (CGPDFArrayGetDictionary(kidsArray, index, &kidNode) == true) // Recurse into node
 			{
-				destinationArray = [self findDestinationWithName:destinationName inDestsTree:kidNode];
+				destinationArray = [self destinationWithName:destinationName inDestsTree:kidNode];
 
-				if (destinationArray != NULL) return destinationArray; // Return the destination array
+				if (destinationArray != NULL) return destinationArray; // Return destination array
 			}
 		}
 	}
@@ -247,7 +262,7 @@
 	return NULL;
 }
 
-- (id)findLinkTarget:(CGPDFDictionaryRef)annotationDictionary
+- (id)annotationLinkTarget:(CGPDFDictionaryRef)annotationDictionary
 {
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
@@ -255,9 +270,9 @@
 
 	id linkTarget = nil; // Link target object
 
-	CGPDFArrayRef destArray = NULL; CGPDFStringRef destName = NULL;
+	CGPDFStringRef destName = NULL; const char *destString = NULL;
 
-	CGPDFDictionaryRef actionDictionary = NULL; // Link action dictionary
+	CGPDFDictionaryRef actionDictionary = NULL; CGPDFArrayRef destArray = NULL;
 
 	if (CGPDFDictionaryGetDictionary(annotationDictionary, "A", &actionDictionary) == true)
 	{
@@ -288,11 +303,14 @@
 			}
 		}
 	}
-	else // Handle other link target possibility
+	else // Handle other link target possibilities
 	{
 		if (CGPDFDictionaryGetArray(annotationDictionary, "Dest", &destArray) == false)
 		{
-			CGPDFDictionaryGetString(annotationDictionary, "Dest", &destName);
+			if (CGPDFDictionaryGetString(annotationDictionary, "Dest", &destName) == false)
+			{
+				CGPDFDictionaryGetName(annotationDictionary, "Dest", &destString);
+			}
 		}
 	}
 
@@ -310,7 +328,24 @@
 			{
 				const char *destinationName = (const char *)CGPDFStringGetBytePtr(destName); // Name
 
-				destArray = [self findDestinationWithName:destinationName inDestsTree:destsDictionary];
+				destArray = [self destinationWithName:destinationName inDestsTree:destsDictionary];
+			}
+		}
+	}
+
+	if (destString != NULL) // Handle a destination string
+	{
+		CGPDFDictionaryRef catalogDictionary = CGPDFDocumentGetCatalog(_PDFDocRef);
+
+		CGPDFDictionaryRef destsDictionary = NULL; // Document destinations dictionary
+
+		if (CGPDFDictionaryGetDictionary(catalogDictionary, "Dests", &destsDictionary) == true)
+		{
+			CGPDFDictionaryRef targetDictionary = NULL; // Destination target dictionary
+
+			if (CGPDFDictionaryGetDictionary(destsDictionary, destString, &targetDictionary) == true)
+			{
+				CGPDFDictionaryGetArray(targetDictionary, "D", &destArray);
 			}
 		}
 	}
@@ -323,7 +358,7 @@
 
 		if (CGPDFArrayGetDictionary(destArray, 0, &pageDictionaryFromDestArray) == true)
 		{
-			NSInteger pageCount = CGPDFDocumentGetNumberOfPages(_PDFDocRef);
+			NSInteger pageCount = CGPDFDocumentGetNumberOfPages(_PDFDocRef); // Pages
 
 			for (NSInteger pageNumber = 1; pageNumber <= pageCount; pageNumber++)
 			{
@@ -374,7 +409,7 @@
 			{
 				if (CGRectContainsPoint(link.rect, point) == true) // Found it
 				{
-					result = [self findLinkTarget:link.dictionary]; break;
+					result = [self annotationLinkTarget:link.dictionary]; break;
 				}
 			}
 		}
@@ -452,21 +487,25 @@
 					default: // Default case
 					case 0: case 180: // 0 and 180 degrees
 					{
-						_pageSize.width = effectiveRect.size.width;
-						_pageSize.height = effectiveRect.size.height;
+						_pageWidth = effectiveRect.size.width;
+						_pageHeight = effectiveRect.size.height;
+						_pageOffsetX = effectiveRect.origin.x;
+						_pageOffsetY = effectiveRect.origin.y;
 						break;
 					}
 
 					case 90: case 270: // 90 and 270 degrees
 					{
-						_pageSize.height = effectiveRect.size.width;
-						_pageSize.width = effectiveRect.size.height;
+						_pageWidth = effectiveRect.size.height;
+						_pageHeight = effectiveRect.size.width;
+						_pageOffsetX = effectiveRect.origin.y;
+						_pageOffsetY = effectiveRect.origin.x;
 						break;
 					}
 				}
 
-				NSInteger page_w = _pageSize.width; // Integer width
-				NSInteger page_h = _pageSize.height; // Integer height
+				NSInteger page_w = _pageWidth; // Integer width
+				NSInteger page_h = _pageHeight; // Integer height
 
 				if (page_w % 2) page_w--; if (page_h % 2) page_h--; // Even
 
@@ -514,6 +553,19 @@
 	[super dealloc];
 }
 
+#if (READER_DISABLE_RETINA == TRUE) // Option
+
+- (void)didMoveToWindow
+{
+#ifdef DEBUGX
+	NSLog(@"%s", __FUNCTION__);
+#endif
+
+	self.contentScaleFactor = 1.0f; // Override scale factor
+}
+
+#endif // end of READER_DISABLE_RETINA Option
+
 /*
 - (void)layoutSubviews
 {
@@ -541,6 +593,8 @@
 
 		drawPDFPageRef = CGPDFPageRetain(_PDFPageRef);
 	}
+
+	//NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(CGContextGetClipBoundingBox(context)));
 
 	CGContextSetRGBFillColor(context, 1.0f, 1.0f, 1.0f, 1.0f); // White
 

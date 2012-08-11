@@ -1,15 +1,26 @@
 //
 //	ReaderMainToolbar.m
-//	Reader v2.5.0
+//	Reader v2.5.4
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
 //
-//	This work is being made available under a Creative Commons Attribution license:
-//		«http://creativecommons.org/licenses/by/3.0/»
-//	You are free to use this work and any derivatives of this work in personal and/or
-//	commercial products and projects as long as the above copyright is maintained and
-//	the original author is attributed.
+//	Permission is hereby granted, free of charge, to any person obtaining a copy
+//	of this software and associated documentation files (the "Software"), to deal
+//	in the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+//	of the Software, and to permit persons to whom the Software is furnished to
+//	do so, subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #import "ReaderConstants.h"
@@ -33,7 +44,6 @@
 #define EMAIL_BUTTON_WIDTH 40.0f
 #define MARK_BUTTON_WIDTH 40.0f
 
-#define TITLE_MINIMUM_WIDTH 128.0f
 #define TITLE_HEIGHT 28.0f
 
 #pragma mark Properties
@@ -161,27 +171,30 @@
 
 #if (READER_ENABLE_PRINT == TRUE) // Option
 
-		Class printInteractionController = NSClassFromString(@"UIPrintInteractionController");
-
-		if ((printInteractionController != nil) && [printInteractionController isPrintingAvailable])
+		if (object.password == nil) // We can only print documents without passwords
 		{
-			rightButtonX -= (PRINT_BUTTON_WIDTH + BUTTON_SPACE);
+			Class printInteractionController = NSClassFromString(@"UIPrintInteractionController");
 
-			UIButton *printButton = [UIButton buttonWithType:UIButtonTypeCustom];
+			if ((printInteractionController != nil) && [printInteractionController isPrintingAvailable])
+			{
+				rightButtonX -= (PRINT_BUTTON_WIDTH + BUTTON_SPACE);
 
-			printButton.frame = CGRectMake(rightButtonX, BUTTON_Y, PRINT_BUTTON_WIDTH, BUTTON_HEIGHT);
-			[printButton setImage:[UIImage imageNamed:@"Reader-Print.png"] forState:UIControlStateNormal];
-			[printButton addTarget:self action:@selector(printButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-			[printButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
-			[printButton setBackgroundImage:buttonN forState:UIControlStateNormal];
-			printButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+				UIButton *printButton = [UIButton buttonWithType:UIButtonTypeCustom];
 
-			[self addSubview:printButton]; titleWidth -= (PRINT_BUTTON_WIDTH + BUTTON_SPACE);
+				printButton.frame = CGRectMake(rightButtonX, BUTTON_Y, PRINT_BUTTON_WIDTH, BUTTON_HEIGHT);
+				[printButton setImage:[UIImage imageNamed:@"Reader-Print.png"] forState:UIControlStateNormal];
+				[printButton addTarget:self action:@selector(printButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+				[printButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
+				[printButton setBackgroundImage:buttonN forState:UIControlStateNormal];
+				printButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+
+				[self addSubview:printButton]; titleWidth -= (PRINT_BUTTON_WIDTH + BUTTON_SPACE);
+			}
 		}
 
 #endif // end of READER_ENABLE_PRINT Option
 
-		if (titleWidth >= TITLE_MINIMUM_WIDTH) // Title minimum width check
+		if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad)
 		{
 			CGRect titleRect = CGRectMake(titleX, BUTTON_Y, titleWidth, TITLE_HEIGHT);
 
@@ -192,7 +205,9 @@
 			titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 			titleLabel.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
 			titleLabel.textColor = [UIColor colorWithWhite:0.0f alpha:1.0f];
+			titleLabel.shadowColor = [UIColor colorWithWhite:0.65f alpha:1.0f];
 			titleLabel.backgroundColor = [UIColor clearColor];
+			titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
 			titleLabel.adjustsFontSizeToFitWidth = YES;
 			titleLabel.minimumFontSize = 14.0f;
 			titleLabel.text = [object.fileName stringByDeletingPathExtension];

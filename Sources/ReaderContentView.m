@@ -1,15 +1,26 @@
 //
 //	ReaderContentView.m
-//	Reader v2.5.1
+//	Reader v2.5.5
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
 //
-//	This work is being made available under a Creative Commons Attribution license:
-//		«http://creativecommons.org/licenses/by/3.0/»
-//	You are free to use this work and any derivatives of this work in personal and/or
-//	commercial products and projects as long as the above copyright is maintained and
-//	the original author is attributed.
+//	Permission is hereby granted, free of charge, to any person obtaining a copy
+//	of this software and associated documentation files (the "Software"), to deal
+//	in the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+//	of the Software, and to permit persons to whom the Software is furnished to
+//	do so, subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #import "ReaderConstants.h"
@@ -24,7 +35,6 @@
 #pragma mark Constants
 
 #define ZOOM_LEVELS 4
-#define ZOOM_AMOUNT 0.5f
 
 #if (READER_SHOW_SHADOWS == TRUE) // Option
 	#define CONTENT_INSET 4.0f
@@ -59,7 +69,9 @@ static inline CGFloat ZoomScaleThatFits(CGSize target, CGSize source)
 
 	self.minimumZoomScale = zoomScale; // Set the minimum and maximum zoom scales
 
-	self.maximumZoomScale = (zoomScale * ZOOM_LEVELS); // Number of zoom levels
+	self.maximumZoomScale = (zoomScale * ZOOM_LEVELS); // Max number of zoom levels
+
+	zoomAmount = ((self.maximumZoomScale - self.minimumZoomScale) / ZOOM_LEVELS);
 }
 
 - (id)initWithFrame:(CGRect)frame fileURL:(NSURL *)fileURL page:(NSUInteger)page password:(NSString *)phrase
@@ -119,7 +131,7 @@ static inline CGFloat ZoomScaleThatFits(CGSize target, CGSize source)
 			self.zoomScale = self.minimumZoomScale; // Set zoom to fit page content
 		}
 
-		[self addObserver:self forKeyPath:@"frame" options:NSKeyValueObservingOptionNew context:NULL];
+		[self addObserver:self forKeyPath:@"frame" options:0 context:NULL];
 
 		self.tag = page; // Tag the view with the page number
 	}
@@ -235,18 +247,15 @@ static inline CGFloat ZoomScaleThatFits(CGSize target, CGSize source)
 
 	CGFloat zoomScale = self.zoomScale;
 
-	if (zoomScale <= self.maximumZoomScale)
+	if (zoomScale < self.maximumZoomScale)
 	{
-		zoomScale += ZOOM_AMOUNT; // +=
+		zoomScale += zoomAmount; // += value
 
 		if (zoomScale > self.maximumZoomScale)
 		{
-			zoomScale = self.minimumZoomScale;
+			zoomScale = self.maximumZoomScale;
 		}
-	}
 
-	if (zoomScale != self.zoomScale) // Do zoom
-	{
 		[self setZoomScale:zoomScale animated:YES];
 	}
 }
@@ -259,18 +268,15 @@ static inline CGFloat ZoomScaleThatFits(CGSize target, CGSize source)
 
 	CGFloat zoomScale = self.zoomScale;
 
-	if (zoomScale >= self.minimumZoomScale)
+	if (zoomScale > self.minimumZoomScale)
 	{
-		zoomScale -= ZOOM_AMOUNT; // -=
+		zoomScale -= zoomAmount; // -= value
 
 		if (zoomScale < self.minimumZoomScale)
 		{
-			zoomScale = self.maximumZoomScale;
+			zoomScale = self.minimumZoomScale;
 		}
-	}
 
-	if (zoomScale != self.zoomScale) // Do zoom
-	{
 		[self setZoomScale:zoomScale animated:YES];
 	}
 }

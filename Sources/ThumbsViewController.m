@@ -1,15 +1,26 @@
 //
 //	ThumbsViewController.m
-//	Reader v2.5.2
+//	Reader v2.5.4
 //
 //	Created by Julius Oklamcak on 2011-09-01.
-//	Copyright © 2011 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
 //
-//	This work is being made available under a Creative Commons Attribution license:
-//		«http://creativecommons.org/licenses/by/3.0/»
-//	You are free to use this work and any derivatives of this work in personal and/or
-//	commercial products and projects as long as the above copyright is maintained and
-//	the original author is attributed.
+//	Permission is hereby granted, free of charge, to any person obtaining a copy
+//	of this software and associated documentation files (the "Software"), to deal
+//	in the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+//	of the Software, and to permit persons to whom the Software is furnished to
+//	do so, subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #import "ReaderConstants.h"
@@ -178,20 +189,7 @@
 	NSLog(@"%s (%d)", __FUNCTION__, interfaceOrientation);
 #endif
 
-    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) // See README
-    {
-        float version = [[[UIDevice currentDevice] systemVersion] floatValue];
-        if (version >= READER_MIN_IOS_TO_ROTATE_IPHONE)
-        {
-            return YES;
-        }
-        else
-        {
-            return UIInterfaceOrientationIsPortrait(interfaceOrientation);
-        }
-	}
-    else
-		return YES;
+	return YES;
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -435,7 +433,7 @@
 
 		imageView.frame = defaultRect; // Update the image view frame
 
-		CGFloat fontSize = (([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 19.0f : 17.0f);
+		CGFloat fontSize = (([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 19.0f : 16.0f);
 
 		textLabel = [[UILabel alloc] initWithFrame:defaultRect];
 
@@ -468,6 +466,17 @@
 
 		[self insertSubview:backView belowSubview:textLabel];
 
+		maskView = [[UIView alloc] initWithFrame:imageView.bounds];
+
+		maskView.hidden = YES;
+		maskView.autoresizesSubviews = NO;
+		maskView.userInteractionEnabled = NO;
+		maskView.contentMode = UIViewContentModeRedraw;
+		maskView.autoresizingMask = UIViewAutoresizingNone;
+		maskView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.25f];
+
+		[imageView addSubview:maskView];
+
 		UIImage *image = [UIImage imageNamed:@"Reader-Mark-Y.png"];
 
 		bookMark = [[UIImageView alloc] initWithImage:image];
@@ -492,6 +501,8 @@
 #endif
 
 	[backView release], backView = nil;
+
+	[maskView release], maskView = nil;
 
 	[textLabel release], textLabel = nil;
 
@@ -528,7 +539,7 @@
 
 	bookMark.frame = [self markRectInImageView]; // Position bookmark image
 
-	backView.bounds = viewRect; backView.center = location;
+	maskView.frame = imageView.bounds; backView.bounds = viewRect; backView.center = location;
 
 #if (READER_SHOW_SHADOWS == TRUE) // Option
 
@@ -551,7 +562,7 @@
 
 	bookMark.hidden = YES; bookMark.frame = [self markRectInImageView];
 
-	backView.frame = defaultRect; // Position background view
+	maskView.hidden = YES; maskView.frame = imageView.bounds; backView.frame = defaultRect;
 
 #if (READER_SHOW_SHADOWS == TRUE) // Option
 
@@ -567,6 +578,15 @@
 #endif
 
 	bookMark.hidden = (show ? NO : YES);
+}
+
+- (void)showTouched:(BOOL)touched
+{
+#ifdef DEBUGX
+	NSLog(@"%s", __FUNCTION__);
+#endif
+
+	maskView.hidden = (touched ? NO : YES);
 }
 
 - (void)showText:(NSString *)text

@@ -1,15 +1,26 @@
 //
 //	ReaderViewController.m
-//	Reader v2.5.2
+//	Reader v2.5.5
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
 //
-//	This work is being made available under a Creative Commons Attribution license:
-//		«http://creativecommons.org/licenses/by/3.0/»
-//	You are free to use this work and any derivatives of this work in personal and/or
-//	commercial products and projects as long as the above copyright is maintained and
-//	the original author is attributed.
+//	Permission is hereby granted, free of charge, to any person obtaining a copy
+//	of this software and associated documentation files (the "Software"), to deal
+//	in the Software without restriction, including without limitation the rights to
+//	use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+//	of the Software, and to permit persons to whom the Software is furnished to
+//	do so, subject to the following conditions:
+//
+//	The above copyright notice and this permission notice shall be included in all
+//	copies or substantial portions of the Software.
+//
+//	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #import "ReaderConstants.h"
@@ -278,13 +289,13 @@
 		{
 			NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
 
-			[notificationCenter addObserver:self selector:@selector(saveReaderDocument:) name:UIApplicationWillTerminateNotification object:nil];
+			[notificationCenter addObserver:self selector:@selector(applicationWill:) name:UIApplicationWillTerminateNotification object:nil];
 
-			[notificationCenter addObserver:self selector:@selector(saveReaderDocument:) name:UIApplicationWillResignActiveNotification object:nil];
+			[notificationCenter addObserver:self selector:@selector(applicationWill:) name:UIApplicationWillResignActiveNotification object:nil];
 
-			document = [object retain]; // Retain the supplied ReaderDocument object for our use
+			[object updateProperties]; document = [object retain]; // Retain the supplied ReaderDocument object for our use
 
-			[ReaderThumbCache touchThumbCacheWithGUID:object.guid]; // Touch thumb cache
+			[ReaderThumbCache touchThumbCacheWithGUID:object.guid]; // Touch the document thumb cache directory
 
 			reader = self; // Return an initialized ReaderViewController object
 		}
@@ -412,7 +423,7 @@
 
 	if (CGSizeEqualToSize(theScrollView.contentSize, CGSizeZero)) // First time
 	{
-		[self performSelector:@selector(showDocument:) withObject:nil afterDelay:0.0];
+		[self performSelector:@selector(showDocument:) withObject:nil afterDelay:0.02];
 	}
 
 #if (READER_DISABLE_IDLE == TRUE) // Option
@@ -468,21 +479,8 @@
 #ifdef DEBUGX
 	NSLog(@"%s (%d)", __FUNCTION__, interfaceOrientation);
 #endif
-    
-	if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) // See README
-    {
-        float version = [[[UIDevice currentDevice] systemVersion] floatValue];
-        if (version >= READER_MIN_IOS_TO_ROTATE_IPHONE)
-        {
-            return YES;
-        }
-        else
-        {
-            return UIInterfaceOrientationIsPortrait(interfaceOrientation);
-        }
-	}
-    else
-		return YES;
+
+	return YES;
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -538,11 +536,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
-
-	[notificationCenter removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
-
-	[notificationCenter removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[mainToolbar release], mainToolbar = nil; [mainPagebar release], mainPagebar = nil;
 
@@ -711,7 +705,26 @@
 			{
 				if ([target isKindOfClass:[NSURL class]]) // Open a URL
 				{
-					[[UIApplication sharedApplication] openURL:target];
+					NSURL *url = (NSURL *)target; // Cast to a NSURL object
+
+					if (url.scheme == nil) // Handle a missing URL scheme
+					{
+						NSString *www = url.absoluteString; // Get URL string
+
+						if ([www hasPrefix:@"www"] == YES) // Check for 'www' prefix
+						{
+							NSString *http = [NSString stringWithFormat:@"http://%@", www];
+
+							url = [NSURL URLWithString:http]; // Proper http-based URL
+						}
+					}
+
+					if ([[UIApplication sharedApplication] openURL:url] == NO)
+					{
+						#ifdef DEBUG
+							NSLog(@"%s '%@'", __FUNCTION__, url); // Bad or unknown URL
+						#endif
+					}
 				}
 				else // Not a URL, so check for other possible object type
 				{
@@ -910,7 +923,7 @@
 
 		printInteraction = [printInteractionController sharedPrintController];
 
-		if ([printInteractionController canPrintURL:fileURL] == YES)
+		if ([printInteractionController canPrintURL:fileURL] == YES) // Check first
 		{
 			UIPrintInfo *printInfo = [NSClassFromString(@"UIPrintInfo") printInfo];
 
@@ -1024,9 +1037,9 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-#ifdef DEBUG
-	if ((result == MFMailComposeResultFailed) && (error != NULL)) NSLog(@"%@", error);
-#endif
+	#ifdef DEBUG
+		if ((result == MFMailComposeResultFailed) && (error != NULL)) NSLog(@"%@", error);
+	#endif
 
 	[self dismissModalViewControllerAnimated:YES]; // Dismiss
 }
@@ -1064,15 +1077,20 @@
 	[self showDocumentPage:page]; // Show the page
 }
 
-#pragma mark Notification observer methods
+#pragma mark UIApplication notification methods
 
-- (void)saveReaderDocument:(NSNotification *)notification
+- (void)applicationWill:(NSNotification *)notification
 {
 #ifdef DEBUGX
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
 	[document saveReaderDocument]; // Save any ReaderDocument object changes
+
+	if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad)
+	{
+		if (printInteraction != nil) [printInteraction dismissAnimated:NO];
+	}
 }
 
 @end
