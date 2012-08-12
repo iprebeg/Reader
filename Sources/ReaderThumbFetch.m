@@ -140,6 +140,8 @@
 		UIImage *decoded = UIGraphicsGetImageFromCurrentImageContext(); // Newly decoded image
 
 		UIGraphicsEndImageContext(); // Cleanup after the bitmap-based graphics drawing context
+        
+        decoded = [decoded scaleProportionalToSize:request.thumbSize];
 
 		[[ReaderThumbCache sharedInstance] setObject:decoded forKey:request.cacheKey]; // Update cache
 
