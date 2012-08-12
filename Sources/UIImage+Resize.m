@@ -12,7 +12,7 @@
 
 - (UIImage *) scaleToSize: (CGSize)size
 {
-    if (DEVICE_IS_RETINA) {
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)] && ([UIScreen mainScreen].scale == 2.0)) {
         size = CGSizeMake(size.width * self.scale, size.height * self.scale);
     }
     
