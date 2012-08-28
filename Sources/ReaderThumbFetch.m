@@ -29,7 +29,6 @@
 #import "ReaderThumbView.h"
 
 #import <ImageIO/ImageIO.h>
-#import "UIImage+Resize.h"
 
 @implementation ReaderThumbFetch
 
@@ -141,8 +140,6 @@
 
 		UIGraphicsEndImageContext(); // Cleanup after the bitmap-based graphics drawing context
         
-        decoded = [decoded scaleProportionalToSize:request.thumbSize];
-
 		[[ReaderThumbCache sharedInstance] setObject:decoded forKey:request.cacheKey]; // Update cache
 
 		if (self.isCancelled == NO) // Show the image in the target thumb view on the main thread
