@@ -31,7 +31,6 @@
 
 @synthesize operation = _operation;
 @synthesize targetTag = _targetTag;
-@synthesize imageView;
 
 #pragma mark ReaderThumbView instance methods
 
@@ -114,11 +113,6 @@
 	[self.operation cancel], self.operation = nil;
 
 	imageView.image = nil; // Release image
-}
-
-- (void)setImageViewContentMode:(UIViewContentMode)contentMode
-{
-    imageView.contentMode = contentMode;
 }
 
 @end
