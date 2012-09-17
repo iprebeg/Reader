@@ -49,7 +49,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	return [[[ReaderThumbRequest alloc] initWithView:view fileURL:url password:phrase guid:guid page:page size:size] autorelease];
+	return [[ReaderThumbRequest alloc] initWithView:view fileURL:url password:phrase guid:guid page:page size:size];
 }
 
 #pragma mark ReaderThumbRequest instance methods
@@ -64,7 +64,7 @@
 	{
 		NSInteger w = size.width; NSInteger h = size.height;
 
-		_thumbView = [view retain]; _thumbPage = page; _thumbSize = size;
+		_thumbView = view; _thumbPage = page; _thumbSize = size;
 
 		_fileURL = [url copy]; _password = [phrase copy]; _guid = [guid copy];
 
@@ -86,19 +86,18 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[_guid release], _guid = nil;
+	_guid = nil;
 
-	[_fileURL release], _fileURL = nil;
+	_fileURL = nil;
 
-	[_password release], _password = nil;
+	_password = nil;
 
-	[_thumbView release], _thumbView = nil;
+	_thumbView = nil;
 
-	[_thumbName release], _thumbName = nil;
+	_thumbName = nil;
 
-	[_cacheKey release], _cacheKey = nil;
+	_cacheKey = nil;
 
-	[super dealloc];
 }
 
 @end

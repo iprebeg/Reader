@@ -44,7 +44,7 @@
 @private // Instance variables
 }
 
-@property (nonatomic, assign, readwrite) id <ThumbsMainToolbarDelegate> delegate;
+@property (nonatomic, weak, readwrite) id <ThumbsMainToolbarDelegate> delegate;
 
 - (id)initWithFrame:(CGRect)frame title:(NSString *)title;
 

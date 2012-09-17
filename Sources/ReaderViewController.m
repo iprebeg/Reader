@@ -172,7 +172,7 @@
 
 				[theScrollView addSubview:contentView]; [contentViews setObject:contentView forKey:key];
 
-				contentView.message = self; [contentView release]; [newPageSet addIndex:number];
+				contentView.message = self;  [newPageSet addIndex:number];
 			}
 			else // Reposition the existing content view
 			{
@@ -195,7 +195,7 @@
 			}
 		];
 
-		[unusedViews release], unusedViews = nil; // Release unused views
+		unusedViews = nil; // Release unused views
 
 		CGFloat viewWidthX1 = viewRect.size.width;
 		CGFloat viewWidthX2 = (viewWidthX1 * 2.0f);
@@ -248,7 +248,7 @@
 			}
 		];
 
-		[newPageSet release], newPageSet = nil; // Release new page set
+		newPageSet = nil; // Release new page set
 
 		[mainPagebar updatePagebar]; // Update the pagebar display
 
@@ -293,7 +293,7 @@
 
 			[notificationCenter addObserver:self selector:@selector(applicationWill:) name:UIApplicationWillResignActiveNotification object:nil];
 
-			[object updateProperties]; document = [object retain]; // Retain the supplied ReaderDocument object for our use
+			[object updateProperties]; document = object; // Retain the supplied ReaderDocument object for our use
 
 			[ReaderThumbCache touchThumbCacheWithGUID:object.guid]; // Touch the document thumb cache directory
 
@@ -390,9 +390,9 @@
 
 	[singleTapOne requireGestureRecognizerToFail:doubleTapOne]; // Single tap requires double tap to fail
 
-	[self.view addGestureRecognizer:singleTapOne]; [singleTapOne release];
-	[self.view addGestureRecognizer:doubleTapOne]; [doubleTapOne release];
-	[self.view addGestureRecognizer:doubleTapTwo]; [doubleTapTwo release];
+	[self.view addGestureRecognizer:singleTapOne]; 
+	[self.view addGestureRecognizer:doubleTapOne]; 
+	[self.view addGestureRecognizer:doubleTapTwo]; 
 
 	contentViews = [NSMutableDictionary new]; lastHideTime = [NSDate new];
 }
@@ -468,11 +468,11 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[mainToolbar release], mainToolbar = nil; [mainPagebar release], mainPagebar = nil;
+	mainToolbar = nil; mainPagebar = nil;
 
-	[theScrollView release], theScrollView = nil; [contentViews release], contentViews = nil;
+	theScrollView = nil; contentViews = nil;
 
-	[lastHideTime release], lastHideTime = nil; lastAppearSize = CGSizeZero; currentPage = 0;
+	lastHideTime = nil; lastAppearSize = CGSizeZero; currentPage = 0;
 
 	[super viewDidUnload];
 }
@@ -541,13 +541,12 @@
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
-	[mainToolbar release], mainToolbar = nil; [mainPagebar release], mainPagebar = nil;
+	mainToolbar = nil; mainPagebar = nil;
 
-	[theScrollView release], theScrollView = nil; [contentViews release], contentViews = nil;
+	theScrollView = nil; contentViews = nil;
 
-	[lastHideTime release], lastHideTime = nil; [document release], document = nil;
+	lastHideTime = nil; document = nil;
 
-	[super dealloc];
 }
 
 #pragma mark UIScrollViewDelegate methods
@@ -857,7 +856,7 @@
         
 		[mainToolbar hideToolbar]; [mainPagebar hidePagebar]; // Hide
 
-		[lastHideTime release]; lastHideTime = [NSDate new];
+		 lastHideTime = [NSDate new];
 	}
 }
 
@@ -908,7 +907,7 @@
 
 	[self presentModalViewController:thumbsViewController animated:NO];
 
-	[thumbsViewController release]; // Release ThumbsViewController
+	 // Release ThumbsViewController
 }
 
 - (void)tappedInToolbar:(ReaderMainToolbar *)toolbar printButton:(UIButton *)button

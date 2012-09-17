@@ -46,7 +46,7 @@
 
 	if ((self = [super initWithGUID:object.guid]))
 	{
-		request = [object retain];
+		request = object;
 	}
 
 	return self;
@@ -60,9 +60,8 @@
 
 	request.thumbView.operation = nil;
 
-	[request release], request = nil;
+	request = nil;
 
-	[super dealloc];
 }
 
 - (void)cancel
@@ -82,7 +81,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	NSFileManager *fileManager = [[NSFileManager new] autorelease]; // File manager instance
+	NSFileManager *fileManager = [NSFileManager new]; // File manager instance
 
 	NSString *cachePath = [ReaderThumbCache thumbCachePathForGUID:request.guid]; // Thumb cache path
 
@@ -101,7 +100,7 @@
 
 	if (self.isCancelled == YES) return;
 
-	CFURLRef fileURL = (CFURLRef)request.fileURL; CGImageRef imageRef = NULL;
+	CFURLRef fileURL = (__bridge CFURLRef)request.fileURL; CGImageRef imageRef = NULL;
 
 	NSInteger page = request.thumbPage; NSString *password = request.password;
 
@@ -206,7 +205,7 @@
 			});
 		}
 
-		CFURLRef thumbURL = (CFURLRef)[self thumbFileURL]; // Thumb cache path with PNG file name URL
+		CFURLRef thumbURL = (__bridge CFURLRef)[self thumbFileURL]; // Thumb cache path with PNG file name URL
 
 		CGImageDestinationRef thumbRef = CGImageDestinationCreateWithURL(thumbURL, (CFStringRef)@"public.png", 1, NULL);
 

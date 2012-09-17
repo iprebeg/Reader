@@ -80,11 +80,10 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[loadQueue release], loadQueue = nil;
+	loadQueue = nil;
 
-	[workQueue release], workQueue = nil;
+	workQueue = nil;
 
-	[super dealloc];
 }
 
 - (void)addLoadOperation:(NSOperation *)operation
@@ -169,7 +168,7 @@
 
 	if ((self = [super init]))
 	{
-		_guid = [guid retain];
+		_guid = guid;
 	}
 
 	return self;
@@ -181,9 +180,8 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[_guid release], _guid = nil;
+	_guid = nil;
 
-	[super dealloc];
 }
 
 @end

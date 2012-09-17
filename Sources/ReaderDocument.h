@@ -52,17 +52,17 @@
     NSString *_title;
 }
 
-@property (nonatomic, retain, readonly) NSString *guid;
-@property (nonatomic, retain, readonly) NSDate *fileDate;
-@property (nonatomic, retain, readwrite) NSDate *lastOpen;
-@property (nonatomic, retain, readonly) NSNumber *fileSize;
-@property (nonatomic, retain, readonly) NSNumber *pageCount;
-@property (nonatomic, retain, readwrite) NSNumber *pageNumber;
-@property (nonatomic, retain, readonly) NSMutableIndexSet *bookmarks;
-@property (nonatomic, retain, readonly) NSString *fileName;
-@property (nonatomic, retain, readonly) NSString *password;
-@property (nonatomic, retain, readonly) NSURL *fileURL;
-@property (nonatomic, retain, readwrite) NSString *title;
+@property (nonatomic, strong, readonly) NSString *guid;
+@property (nonatomic, strong, readonly) NSDate *fileDate;
+@property (nonatomic, strong, readwrite) NSDate *lastOpen;
+@property (nonatomic, strong, readonly) NSNumber *fileSize;
+@property (nonatomic, strong, readonly) NSNumber *pageCount;
+@property (nonatomic, strong, readwrite) NSNumber *pageNumber;
+@property (nonatomic, strong, readonly) NSMutableIndexSet *bookmarks;
+@property (nonatomic, strong, readonly) NSString *fileName;
+@property (nonatomic, strong, readonly) NSString *password;
+@property (nonatomic, strong, readonly) NSURL *fileURL;
+@property (nonatomic, strong, readwrite) NSString *title;
 
 + (ReaderDocument *)withDocumentFilePath:(NSString *)filename password:(NSString *)phrase;
 

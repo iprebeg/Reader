@@ -138,10 +138,10 @@
 
 		[self addSubview:flagButton]; titleWidth -= (MARK_BUTTON_WIDTH + BUTTON_SPACE);
 
-		markButton = [flagButton retain]; markButton.enabled = NO; markButton.tag = NSIntegerMin;
+		markButton = flagButton; markButton.enabled = NO; markButton.tag = NSIntegerMin;
 
-		markImageN = [[UIImage imageNamed:@"Reader-Mark-N.png"] retain]; // N image
-		markImageY = [[UIImage imageNamed:@"Reader-Mark-Y.png"] retain]; // Y image
+		markImageN = [UIImage imageNamed:@"Reader-Mark-N.png"]; // N image
+		markImageY = [UIImage imageNamed:@"Reader-Mark-Y.png"]; // Y image
 
 #endif // end of READER_BOOKMARKS Option
 
@@ -213,7 +213,7 @@
 			titleLabel.minimumFontSize = 14.0f;
 			titleLabel.text = object.title;
 
-			[self addSubview:titleLabel]; [titleLabel release];
+			[self addSubview:titleLabel]; 
 		}
 	}
 
@@ -226,12 +226,11 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[markButton release], markButton = nil;
+	markButton = nil;
 
-	[markImageN release], markImageN = nil;
-	[markImageY release], markImageY = nil;
+	markImageN = nil;
+	markImageY = nil;
 
-	[super dealloc];
 }
 
 - (void)setBookmarkState:(BOOL)state

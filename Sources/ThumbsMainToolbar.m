@@ -108,7 +108,7 @@
 
 		[showControl addTarget:self action:@selector(showControlTapped:) forControlEvents:UIControlEventValueChanged];
 
-		[self addSubview:showControl]; [showControl release];
+		[self addSubview:showControl]; 
 
 		titleWidth -= (SHOW_CONTROL_WIDTH + BUTTON_SPACE);
 
@@ -132,21 +132,13 @@
 			titleLabel.minimumFontSize = 14.0f;
 			titleLabel.text = title;
 
-			[self addSubview:titleLabel]; [titleLabel release];
+			[self addSubview:titleLabel]; 
 		}
 	}
 
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 #pragma mark UISegmentedControl action methods
 

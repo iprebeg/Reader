@@ -55,11 +55,11 @@
 
 		UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
 		//tapGesture.numberOfTouchesRequired = 1; tapGesture.numberOfTapsRequired = 1; tapGesture.delegate = self;
-		[self addGestureRecognizer:tapGesture]; [tapGesture release];
+		[self addGestureRecognizer:tapGesture]; 
 
 		UILongPressGestureRecognizer *pressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handlePressGesture:)];
 		pressGesture.minimumPressDuration = 0.8; //pressGesture.numberOfTouchesRequired = 1; pressGesture.delegate = self;
-		[self addGestureRecognizer:pressGesture]; [pressGesture release];
+		[self addGestureRecognizer:pressGesture]; 
 
 		lastContentOffset = CGPointMake(CGFLOAT_MIN, CGFLOAT_MIN);
 	}
@@ -73,13 +73,12 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[thumbCellsQueue release], thumbCellsQueue = nil;
+	thumbCellsQueue = nil;
 
-	[thumbCellsVisible release], thumbCellsVisible = nil;
+	thumbCellsVisible = nil;
 
-	[touchedCell release], touchedCell = nil;
+	touchedCell = nil;
 
-	[super dealloc];
 }
 
 - (void)requeueThumbCell:(ReaderThumbView *)tvCell
@@ -112,7 +111,7 @@
 			[self requeueThumbCell:tvCell];
 		}
 
-		[visible release]; // Cleanup
+		 // Cleanup
 	}
 }
 
@@ -126,7 +125,7 @@
 
 	if (thumbCellsQueue.count > 0) // Reuse existing cell
 	{
-		theCell = [[thumbCellsQueue objectAtIndex:0] retain];
+		theCell = [thumbCellsQueue objectAtIndex:0];
 
 		[thumbCellsQueue removeObjectAtIndex:0]; // Dequeue it
 
@@ -134,7 +133,7 @@
 	}
 	else // Allocate a brand new thumb cell subclass for our use
 	{
-		theCell = [[delegate thumbsView:self thumbCellWithFrame:frame] retain];
+		theCell = [delegate thumbsView:self thumbCellWithFrame:frame];
 
 		assert([theCell isKindOfClass:[ReaderThumbView class]]); // Check
 
@@ -143,7 +142,7 @@
 		[self insertSubview:theCell atIndex:0]; // Add
 	}
 
-	[thumbCellsVisible addObject:theCell]; [theCell release];
+	[thumbCellsVisible addObject:theCell]; 
 
 	return theCell;
 }
@@ -578,7 +577,7 @@
 {
 	[super touchesBegan:touches withEvent:event]; // Message superclass
 
-	if (touchedCell != nil) { [touchedCell showTouched:NO]; [touchedCell release], touchedCell = nil; }
+	if (touchedCell != nil) { [touchedCell showTouched:NO]; touchedCell = nil; }
 
 	if (touches.count == 1) // Show selection on single touch
 	{
@@ -588,7 +587,7 @@
 
 		ReaderThumbView *tvCell = [self thumbCellContainingPoint:point]; // Look for cell
 
-		if (tvCell != nil) { touchedCell = [tvCell retain]; [touchedCell showTouched:YES]; }
+		if (tvCell != nil) { touchedCell = tvCell; [touchedCell showTouched:YES]; }
 	}
 }
 
@@ -596,14 +595,14 @@
 {
 	[super touchesCancelled:touches withEvent:event]; // Message superclass
 
-	if (touchedCell != nil) { [touchedCell showTouched:NO]; [touchedCell release], touchedCell = nil; }
+	if (touchedCell != nil) { [touchedCell showTouched:NO]; touchedCell = nil; }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	[super touchesEnded:touches withEvent:event]; // Message superclass
 
-	if (touchedCell != nil) { [touchedCell showTouched:NO]; [touchedCell release], touchedCell = nil; }
+	if (touchedCell != nil) { [touchedCell showTouched:NO]; touchedCell = nil; }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event

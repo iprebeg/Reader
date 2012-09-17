@@ -68,7 +68,7 @@
 	NSTimer *trackTimer;
 }
 
-@property (nonatomic, assign, readwrite) id <ReaderMainPagebarDelegate> delegate;
+@property (nonatomic, weak, readwrite) id <ReaderMainPagebarDelegate> delegate;
 
 - (id)initWithFrame:(CGRect)frame document:(ReaderDocument *)object;
 

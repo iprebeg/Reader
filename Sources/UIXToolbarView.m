@@ -69,20 +69,12 @@
 
 		UIXToolbarShadow *shadowView = [[UIXToolbarShadow alloc] initWithFrame:shadowRect];
 
-		[self addSubview:shadowView]; [shadowView release];
+		[self addSubview:shadowView]; 
 	}
 
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 @end
 
@@ -134,13 +126,5 @@
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 @end

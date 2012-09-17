@@ -60,7 +60,7 @@
 		{
 			updateBookmarked = YES; bookmarked = [NSMutableArray new]; // Bookmarked pages
 
-			document = [object retain]; // Retain the ReaderDocument object for our use
+			document = object; // Retain the ReaderDocument object for our use
 
 			thumbs = self; // Return an initialized ThumbsViewController object
 		}
@@ -176,9 +176,9 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[theThumbsView release], theThumbsView = nil;
+	theThumbsView = nil;
 
-	[mainToolbar release], mainToolbar = nil;
+	mainToolbar = nil;
 
 	[super viewDidUnload];
 }
@@ -230,15 +230,14 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[bookmarked release], bookmarked = nil;
+	bookmarked = nil;
 
-	[theThumbsView release], theThumbsView = nil;
+	theThumbsView = nil;
 
-	[mainToolbar release], mainToolbar = nil;
+	mainToolbar = nil;
 
-	[document release], document = nil;
+	document = nil;
 
-	[super dealloc];
 }
 
 #pragma mark ThumbsMainToolbarDelegate methods
@@ -315,7 +314,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	return [[[ThumbsPageThumb alloc] initWithFrame:frame] autorelease];
+	return [[ThumbsPageThumb alloc] initWithFrame:frame];
 }
 
 - (void)thumbsView:(ReaderThumbsView *)thumbsView updateThumbCell:(ThumbsPageThumb *)thumbCell forIndex:(NSInteger)index
@@ -500,15 +499,14 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[backView release], backView = nil;
+	backView = nil;
 
-	[maskView release], maskView = nil;
+	maskView = nil;
 
-	[textLabel release], textLabel = nil;
+	textLabel = nil;
 
-	[bookMark release], bookMark = nil;
+	bookMark = nil;
 
-	[super dealloc];
 }
 
 - (CGSize)maximumContentSize

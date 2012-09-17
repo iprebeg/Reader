@@ -68,7 +68,7 @@
 			highlight.autoresizingMask = UIViewAutoresizingNone;
 			highlight.backgroundColor = hilite; // Color
 
-			[self addSubview:highlight]; [highlight release];
+			[self addSubview:highlight]; 
 		}
 	}
 }
@@ -444,7 +444,6 @@
 	}
 	else // Handle invalid frame size
 	{
-		[self release];
 	}
 
 	return view;
@@ -460,7 +459,7 @@
 
 	if (fileURL != nil) // Check for non-nil file URL
 	{
-		_PDFDocRef = CGPDFDocumentCreateX((CFURLRef)fileURL, phrase);
+		_PDFDocRef = CGPDFDocumentCreateX((__bridge CFURLRef)fileURL, phrase);
 
 		if (_PDFDocRef != NULL) // Check for non-NULL CGPDFDocumentRef
 		{
@@ -541,7 +540,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[_links release], _links = nil;
+	_links = nil;
 
 	@synchronized(self) // Block any other threads
 	{
@@ -550,7 +549,6 @@
 		CGPDFDocumentRelease(_PDFDocRef), _PDFDocRef = NULL;
 	}
 
-	[super dealloc];
 }
 
 #if (READER_DISABLE_RETINA == TRUE) // Option
@@ -637,7 +635,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	return [[[ReaderDocumentLink alloc] initWithRect:linkRect dictionary:linkDictionary] autorelease];
+	return [[ReaderDocumentLink alloc] initWithRect:linkRect dictionary:linkDictionary];
 }
 
 #pragma mark ReaderDocumentLink instance methods
@@ -658,13 +656,5 @@
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 @end

@@ -200,7 +200,7 @@
 
 		ReaderPagebarShadow *shadowView = [[ReaderPagebarShadow alloc] initWithFrame:shadowRect];
 
-		[self addSubview:shadowView]; [shadowView release]; // Add the shadow to the view
+		[self addSubview:shadowView];  // Add the shadow to the view
 
 		CGFloat numberY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE));
 		CGFloat numberX = ((self.bounds.size.width - PAGE_NUMBER_WIDTH) / 2.0f);
@@ -244,7 +244,7 @@
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
         //tapGesture.numberOfTouchesRequired = 1; tapGesture.numberOfTapsRequired = 1; tapGesture.delegate = self;
-        [scrollView addGestureRecognizer:tapGesture]; [tapGesture release];
+        [scrollView addGestureRecognizer:tapGesture]; 
         [self addSubview:scrollView];
 #else
 		trackControl = [[ReaderTrackControl alloc] initWithFrame:self.bounds]; // Track control view
@@ -257,7 +257,7 @@
 		[self addSubview:trackControl]; // Add the track control and thumbs view
 #endif
 
-		document = [object retain]; // Retain the document object for our use
+		document = object; // Retain the document object for our use
 
 		[self updatePageNumberText:[document.pageNumber integerValue]];
 
@@ -284,26 +284,25 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[trackTimer release], trackTimer = nil;
+	trackTimer = nil;
 
-	[enableTimer release], enableTimer = nil;
+	enableTimer = nil;
 
 #if (READER_SLIDER == TRUE)
-    [scrollView release], scrollView = nil;
+    scrollView = nil;
 #else
 	[trackControl release], trackControl = nil;
 #endif
-	[miniThumbViews release], miniThumbViews = nil;
+	miniThumbViews = nil;
 
-	[pageNumberLabel release], pageNumberLabel = nil;
+	pageNumberLabel = nil;
 
-	[pageNumberView release], pageNumberView = nil;
+	pageNumberView = nil;
 
-	[pageThumbView release], pageThumbView = nil;
+	pageThumbView = nil;
 
-	[document release], document = nil;
+	document = nil;
 
-	[super dealloc];
 }
 
 - (void)layoutSubviews
@@ -391,7 +390,7 @@
 	CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
 #endif
    
-	NSMutableDictionary *thumbsToHide = [[miniThumbViews mutableCopy] autorelease];
+	NSMutableDictionary *thumbsToHide = [miniThumbViews mutableCopy];
 
 	for (NSInteger thumb = 0; thumb < thumbs; thumb++) // Iterate through needed thumbs
 	{
@@ -427,7 +426,7 @@
 			[trackControl addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
 #endif
             
-			[smallThumbView release], smallThumbView = nil; // Cleanup
+			smallThumbView = nil; // Cleanup
 		}
 		else // Resue existing small thumb view for the page number
 		{
@@ -527,7 +526,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[trackTimer invalidate]; [trackTimer release], trackTimer = nil; // Cleanup
+	[trackTimer invalidate]; trackTimer = nil; // Cleanup
 #if (READER_SLIDER == TRUE)
 #else
 	if (trackControl.tag != [document.pageNumber integerValue]) // Only if different
@@ -543,7 +542,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[enableTimer invalidate]; [enableTimer release], enableTimer = nil; // Cleanup
+	[enableTimer invalidate]; enableTimer = nil; // Cleanup
 #if (READER_SLIDER == TRUE)
 #else
 	trackControl.userInteractionEnabled = YES; // Enable track control interaction
@@ -556,9 +555,9 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	if (trackTimer != nil) { [trackTimer invalidate]; [trackTimer release], trackTimer = nil; } // Invalidate and release previous timer
+	if (trackTimer != nil) { [trackTimer invalidate]; trackTimer = nil; } // Invalidate and release previous timer
 
-	trackTimer = [[NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(trackTimerFired:) userInfo:nil repeats:NO] retain];
+	trackTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(trackTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)startEnableTimer
@@ -567,9 +566,9 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	if (enableTimer != nil) { [enableTimer invalidate]; [enableTimer release], enableTimer = nil; } // Invalidate and release previous timer
+	if (enableTimer != nil) { [enableTimer invalidate]; enableTimer = nil; } // Invalidate and release previous timer
 
-	enableTimer = [[NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(enableTimerFired:) userInfo:nil repeats:NO] retain];
+	enableTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(enableTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (NSInteger)trackViewPageNumber:(ReaderTrackControl *)trackView
@@ -633,7 +632,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	[trackTimer invalidate]; [trackTimer release], trackTimer = nil; // Cleanup
+	[trackTimer invalidate]; trackTimer = nil; // Cleanup
 
 	if (trackView.tag != [document.pageNumber integerValue]) // Only if different
 	{
@@ -722,14 +721,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-    NSLog(@"%s", __FUNCTION__);
-#endif
-
-    [super dealloc];
-}
 
 @end
 
@@ -765,14 +756,6 @@
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 - (CGFloat)limitValue:(CGFloat)valueX
 {
@@ -904,14 +887,6 @@
 
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 @end
 
@@ -963,13 +938,5 @@
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[super dealloc];
-}
 
 @end

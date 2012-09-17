@@ -52,7 +52,7 @@
 	CGFloat zoomAmount;
 }
 
-@property (nonatomic, assign, readwrite) id <ReaderContentViewDelegate> message;
+@property (nonatomic, weak, readwrite) id <ReaderContentViewDelegate> message;
 
 - (id)initWithFrame:(CGRect)frame fileURL:(NSURL *)fileURL page:(NSUInteger)page password:(NSString *)phrase;
 

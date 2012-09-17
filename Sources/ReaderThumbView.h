@@ -31,14 +31,14 @@
 
 	NSUInteger _targetTag;
 
-	NSOperation *_operation;
+	NSOperation *__weak _operation;
 
 @protected // Instance variables
 
 	UIImageView *imageView;
 }
 
-@property (assign, readwrite) NSOperation *operation;
+@property (weak, readwrite) NSOperation *operation;
 
 @property (nonatomic, assign, readwrite) NSUInteger targetTag;
 

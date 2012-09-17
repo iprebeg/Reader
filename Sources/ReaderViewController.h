@@ -70,7 +70,7 @@
 	BOOL isVisible;
 }
 
-@property (nonatomic, assign, readwrite) id <ReaderViewControllerDelegate> delegate;
+@property (nonatomic, weak, readwrite) id <ReaderViewControllerDelegate> delegate;
 
 - (id)initWithReaderDocument:(ReaderDocument *)object;
 
