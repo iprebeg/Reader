@@ -46,6 +46,8 @@
 
 	NSTimer *enableTimer;
 	NSTimer *trackTimer;
+    
+    UIScrollView *scrollView;
 }
 
 #pragma mark Constants
