@@ -1,6 +1,6 @@
 //
 //	ReaderThumbQueue.h
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -25,14 +25,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ReaderThumbQueue : NSObject
-{
-@private // Instance variables
-
-	NSOperationQueue *loadQueue;
-
-	NSOperationQueue *workQueue;
-}
+@interface ReaderThumbQueue : NSObject <NSObject>
 
 + (ReaderThumbQueue *)sharedInstance;
 
@@ -53,11 +46,6 @@
 //
 
 @interface ReaderThumbOperation : NSOperation
-{
-@protected // Instance variables
-
-	NSString *_guid;
-}
 
 @property (nonatomic, strong, readonly) NSString *guid;
 

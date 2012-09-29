@@ -1,6 +1,6 @@
 //
 //	ReaderMainPagebar.h
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -45,30 +45,8 @@
 @end
 
 @interface ReaderMainPagebar : UIView
-{
-@private // Instance variables
 
-	ReaderDocument *document;
-
-#if (READER_SLIDER == TRUE)
-    ReaderPreview *scrollView;
-#else
-	ReaderTrackControl *trackControl;
-#endif
-    
-	NSMutableDictionary *miniThumbViews;
-
-	ReaderPagebarThumb *pageThumbView;
-
-	UILabel *pageNumberLabel;
-
-	UIView *pageNumberView;
-
-	NSTimer *enableTimer;
-	NSTimer *trackTimer;
-}
-
-@property (nonatomic, weak, readwrite) id <ReaderMainPagebarDelegate> delegate;
+@property (nonatomic, unsafe_unretained, readwrite) id <ReaderMainPagebarDelegate> delegate;
 
 - (id)initWithFrame:(CGRect)frame document:(ReaderDocument *)object;
 
@@ -100,11 +78,6 @@
 //
 
 @interface ReaderTrackControl : UIControl
-{
-@private // Instance variables
-
-	CGFloat _value;
-}
 
 @property (nonatomic, assign, readonly) CGFloat value;
 
@@ -117,9 +90,6 @@
 //
 
 @interface ReaderPagebarThumb : ReaderThumbView
-{
-@private // Instance variables
-}
 
 - (id)initWithFrame:(CGRect)frame small:(BOOL)small;
 - (void)makeTransparent;
@@ -134,8 +104,5 @@
 //
 
 @interface ReaderPagebarShadow : UIView
-{
-@private // Instance variables
-}
 
 @end

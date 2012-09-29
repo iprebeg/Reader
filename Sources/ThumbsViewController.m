@@ -1,6 +1,6 @@
 //
 //	ThumbsViewController.m
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -31,7 +31,26 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+@interface ThumbsViewController () <ThumbsMainToolbarDelegate, ReaderThumbsViewDelegate>
+
+@end
+
 @implementation ThumbsViewController
+{
+	ReaderDocument *document;
+
+	ThumbsMainToolbar *mainToolbar;
+
+	ReaderThumbsView *theThumbsView;
+
+	NSMutableArray *bookmarked;
+
+	CGPoint thumbsOffset;
+	CGPoint markedOffset;
+
+	BOOL updateBookmarked;
+	BOOL showBookmarked;
+}
 
 #pragma mark Constants
 
@@ -48,10 +67,6 @@
 
 - (id)initWithReaderDocument:(ReaderDocument *)object
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	id thumbs = nil; // ThumbsViewController object
 
 	if ((object != nil) && ([object isKindOfClass:[ReaderDocument class]]))
@@ -69,28 +84,11 @@
 	return thumbs;
 }
 
-/*
-- (void)loadView
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	// Implement loadView to create a view hierarchy programmatically, without using a nib.
-}
-*/
-
 - (void)viewDidLoad
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(self.view.bounds));
-#endif
-
 	[super viewDidLoad];
 
-	NSAssert(!(delegate == nil), @"delegate == nil");
-
-	NSAssert(!(document == nil), @"ReaderDocument == nil");
+	assert(delegate != nil); assert(document != nil);
 
 	self.view.backgroundColor = [UIColor scrollViewTexturedBackgroundColor];
 
@@ -134,10 +132,6 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(self.view.bounds));
-#endif
-
 	[super viewWillAppear:animated];
 
 	[theThumbsView reloadThumbsCenterOnIndex:([document.pageNumber integerValue] - 1)]; // Page
@@ -145,109 +139,63 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(self.view.bounds));
-#endif
-
 	[super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(self.view.bounds));
-#endif
-
 	[super viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@", __FUNCTION__, NSStringFromCGRect(self.view.bounds));
-#endif
-
 	[super viewDidDisappear:animated];
 }
 
 - (void)viewDidUnload
 {
-#ifdef DEBUGX
+#ifdef DEBUG
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
-	theThumbsView = nil;
-
-	mainToolbar = nil;
+	mainToolbar = nil; theThumbsView = nil;
 
 	[super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-#ifdef DEBUGX
-	NSLog(@"%s (%d)", __FUNCTION__, interfaceOrientation);
-#endif
-
 	return YES;
 }
 
+/*
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@ (%d)", __FUNCTION__, NSStringFromCGRect(self.view.bounds), toInterfaceOrientation);
-#endif
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation duration:(NSTimeInterval)duration
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@ (%d)", __FUNCTION__, NSStringFromCGRect(self.view.bounds), interfaceOrientation);
-#endif
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
-#ifdef DEBUGX
-	NSLog(@"%s %@ (%d to %d)", __FUNCTION__, NSStringFromCGRect(self.view.bounds), fromInterfaceOrientation, self.interfaceOrientation);
-#endif
-
 	//if (fromInterfaceOrientation == self.interfaceOrientation) return;
 }
+*/
 
 - (void)didReceiveMemoryWarning
 {
-#ifdef DEBUGX
+#ifdef DEBUG
 	NSLog(@"%s", __FUNCTION__);
 #endif
 
 	[super didReceiveMemoryWarning];
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	bookmarked = nil;
-
-	theThumbsView = nil;
-
-	mainToolbar = nil;
-
-	document = nil;
-
-}
-
 #pragma mark ThumbsMainToolbarDelegate methods
 
 - (void)tappedInToolbar:(ThumbsMainToolbar *)toolbar showControl:(UISegmentedControl *)control
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	switch (control.selectedSegmentIndex)
 	{
 		case 0: // Show all page thumbs
@@ -290,10 +238,6 @@
 
 - (void)tappedInToolbar:(ThumbsMainToolbar *)toolbar doneButton:(UIButton *)button
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	[delegate dismissThumbsViewController:self]; // Dismiss thumbs display
 }
 
@@ -301,28 +245,16 @@
 
 - (NSUInteger)numberOfThumbsInThumbsView:(ReaderThumbsView *)thumbsView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return (showBookmarked ? bookmarked.count : [document.pageCount integerValue]);
 }
 
 - (id)thumbsView:(ReaderThumbsView *)thumbsView thumbCellWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return [[ThumbsPageThumb alloc] initWithFrame:frame];
 }
 
 - (void)thumbsView:(ReaderThumbsView *)thumbsView updateThumbCell:(ThumbsPageThumb *)thumbCell forIndex:(NSInteger)index
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGSize size = [thumbCell maximumContentSize]; // Get the cell's maximum content size
 
 	NSInteger page = (showBookmarked ? [[bookmarked objectAtIndex:index] integerValue] : (index + 1));
@@ -342,10 +274,6 @@
 
 - (void)thumbsView:(ReaderThumbsView *)thumbsView refreshThumbCell:(ThumbsPageThumb *)thumbCell forIndex:(NSInteger)index
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	NSInteger page = (showBookmarked ? [[bookmarked objectAtIndex:index] integerValue] : (index + 1));
 
 	[thumbCell showBookmark:[document.bookmarks containsIndex:page]]; // Show bookmarked status
@@ -353,10 +281,6 @@
 
 - (void)thumbsView:(ReaderThumbsView *)thumbsView didSelectThumbWithIndex:(NSInteger)index
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	NSInteger page = (showBookmarked ? [[bookmarked objectAtIndex:index] integerValue] : (index + 1));
 
 	[delegate thumbsViewController:self gotoPage:page]; // Show the selected page
@@ -366,10 +290,6 @@
 
 - (void)thumbsView:(ReaderThumbsView *)thumbsView didPressThumbWithIndex:(NSInteger)index
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	NSInteger page = (showBookmarked ? [[bookmarked objectAtIndex:index] integerValue] : (index + 1));
 
 	if ([document.bookmarks containsIndex:page]) [document.bookmarks removeIndex:page]; else [document.bookmarks addIndex:page];
@@ -386,23 +306,28 @@
 //
 
 @implementation ThumbsPageThumb
+{
+	UIView *backView;
+
+	UIView *tintView;
+
+	UILabel *textLabel;
+
+	UIImageView *bookMark;
+
+	CGSize maximumSize;
+
+	CGRect defaultRect;
+}
 
 #pragma mark Constants
 
 #define CONTENT_INSET 8.0f
 
-//#pragma mark Properties
-
-//@synthesize ;
-
 #pragma mark ThumbsPageThumb instance methods
 
 - (CGRect)markRectInImageView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGRect iconRect = bookMark.frame; iconRect.origin.y = (-2.0f);
 
 	iconRect.origin.x = (imageView.bounds.size.width - bookMark.image.size.width - 8.0f);
@@ -412,10 +337,6 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if ((self = [super initWithFrame:frame]))
 	{
 		imageView.contentMode = UIViewContentModeCenter;
@@ -465,18 +386,18 @@
 
 		[self insertSubview:backView belowSubview:textLabel];
 
-		maskView = [[UIView alloc] initWithFrame:imageView.bounds];
+		tintView = [[UIView alloc] initWithFrame:imageView.bounds];
 
-		maskView.hidden = YES;
-		maskView.autoresizesSubviews = NO;
-		maskView.userInteractionEnabled = NO;
-		maskView.contentMode = UIViewContentModeRedraw;
-		maskView.autoresizingMask = UIViewAutoresizingNone;
-		maskView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.25f];
+		tintView.hidden = YES;
+		tintView.autoresizesSubviews = NO;
+		tintView.userInteractionEnabled = NO;
+		tintView.contentMode = UIViewContentModeRedraw;
+		tintView.autoresizingMask = UIViewAutoresizingNone;
+		tintView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.25f];
 
-		[imageView addSubview:maskView];
+		[imageView addSubview:tintView];
 
-		UIImage *image = [UIImage imageNamed:@"Reader-Mark-Y.png"];
+		UIImage *image = [UIImage imageNamed:@"Reader-Mark-Y"];
 
 		bookMark = [[UIImageView alloc] initWithImage:image];
 
@@ -493,37 +414,13 @@
 	return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	backView = nil;
-
-	maskView = nil;
-
-	textLabel = nil;
-
-	bookMark = nil;
-
-}
-
 - (CGSize)maximumContentSize
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return maximumSize;
 }
 
 - (void)showImage:(UIImage *)image
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	NSInteger x = (self.bounds.size.width / 2.0f);
 	NSInteger y = (self.bounds.size.height / 2.0f);
 
@@ -537,7 +434,7 @@
 
 	bookMark.frame = [self markRectInImageView]; // Position bookmark image
 
-	maskView.frame = imageView.bounds; backView.bounds = viewRect; backView.center = location;
+	tintView.frame = imageView.bounds; backView.bounds = viewRect; backView.center = location;
 
 #if (READER_SHOW_SHADOWS == TRUE) // Option
 
@@ -548,10 +445,6 @@
 
 - (void)reuse
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	[super reuse]; // Reuse thumb view
 
 	textLabel.text = nil; textLabel.frame = defaultRect;
@@ -560,7 +453,7 @@
 
 	bookMark.hidden = YES; bookMark.frame = [self markRectInImageView];
 
-	maskView.hidden = YES; maskView.frame = imageView.bounds; backView.frame = defaultRect;
+	tintView.hidden = YES; tintView.frame = imageView.bounds; backView.frame = defaultRect;
 
 #if (READER_SHOW_SHADOWS == TRUE) // Option
 
@@ -571,28 +464,16 @@
 
 - (void)showBookmark:(BOOL)show
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	bookMark.hidden = (show ? NO : YES);
 }
 
 - (void)showTouched:(BOOL)touched
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	maskView.hidden = (touched ? NO : YES);
+	tintView.hidden = (touched ? NO : YES);
 }
 
 - (void)showText:(NSString *)text
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	textLabel.text = text;
 }
 

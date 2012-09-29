@@ -1,6 +1,6 @@
 //
 //	ReaderThumbRequest.h
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -27,30 +27,7 @@
 
 @class ReaderThumbView;
 
-@interface ReaderThumbRequest : NSObject
-{
-@private // Instance variables
-
-	NSURL *_fileURL;
-
-	NSString *_guid;
-
-	NSString *_password;
-
-	NSString *_cacheKey;
-
-	NSString *_thumbName;
-
-	ReaderThumbView *_thumbView;
-
-	NSUInteger _targetTag;
-
-	NSInteger _thumbPage;
-
-	CGSize _thumbSize;
-
-	CGFloat _scale;
-}
+@interface ReaderThumbRequest : NSObject <NSObject>
 
 @property (nonatomic, strong, readonly) NSURL *fileURL;
 @property (nonatomic, strong, readonly) NSString *guid;

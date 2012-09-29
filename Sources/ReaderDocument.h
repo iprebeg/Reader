@@ -1,6 +1,6 @@
 //
 //	ReaderDocument.h
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-07-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -25,32 +25,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ReaderDocument : NSObject <NSCoding>
-{
-@private // Instance variables
-
-	NSString *_guid;
-
-	NSDate *_fileDate;
-
-	NSDate *_lastOpen;
-
-	NSNumber *_fileSize;
-
-	NSNumber *_pageCount;
-
-	NSNumber *_pageNumber;
-
-	NSMutableIndexSet *_bookmarks;
-
-	NSString *_fileName;
-
-	NSString *_password;
-
-	NSURL *_fileURL;
-
-    NSString *_title;
-}
+@interface ReaderDocument : NSObject <NSObject, NSCoding>
 
 @property (nonatomic, strong, readonly) NSString *guid;
 @property (nonatomic, strong, readonly) NSDate *fileDate;

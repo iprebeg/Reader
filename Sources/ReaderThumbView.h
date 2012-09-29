@@ -1,6 +1,6 @@
 //
 //	ReaderThumbView.h
-//	Reader v2.5.4
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -27,12 +27,6 @@
 
 @interface ReaderThumbView : UIView
 {
-@private // Instance variables
-
-	NSUInteger _targetTag;
-
-	NSOperation *__unsafe_unretained _operation;
-
 @protected // Instance variables
 
 	UIImageView *imageView;

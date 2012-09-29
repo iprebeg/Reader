@@ -1,6 +1,6 @@
 //
 //	ReaderMainPagebar.m
-//	Reader v2.5.6
+//	Reader v2.6.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
 //	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
@@ -31,6 +31,22 @@
 #import <QuartzCore/QuartzCore.h>
 
 @implementation ReaderMainPagebar
+{
+	ReaderDocument *document;
+
+	ReaderTrackControl *trackControl;
+
+	NSMutableDictionary *miniThumbViews;
+
+	ReaderPagebarThumb *pageThumbView;
+
+	UILabel *pageNumberLabel;
+
+	UIView *pageNumberView;
+
+	NSTimer *enableTimer;
+	NSTimer *trackTimer;
+}
 
 #pragma mark Constants
 
@@ -71,10 +87,6 @@
 
 + (Class)layerClass
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return [CAGradientLayer class];
 }
 
@@ -82,38 +94,29 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return [self initWithFrame:frame document:nil];
 }
 
 - (void)updatePageThumbView:(NSInteger)page
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-    
-    NSInteger pages = [document.pageNumber intValue];
+	NSInteger pages = [document.pageCount integerValue];
             
 #if (READER_SLIDER == TRUE)
-    ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
+	ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
         
-    CGPoint point = [tthumb center];
-    point.y = 0; 
-    point.x = point.x - (self.frame.size.width / 2);
+	CGPoint point = [tthumb center];
+	point.y = 0; 
+	point.x = point.x - (self.frame.size.width / 2);
     
-    [scrollView setContentOffset:point animated:YES];
+	[scrollView setContentOffset:point animated:YES];
 #endif
-
 
 	if (pages > 1) // Only update frame if more than one page
 	{
 #if (READER_SLIDER == TRUE)
 		CGFloat controlWidth = scrollView.bounds.size.width;
 #else
-        CGFloat controlWidth = trackControl.bounds.size.width;
+		CGFloat controlWidth = trackControl.bounds.size.width;
 #endif
 		CGFloat useableWidth = (controlWidth - THUMB_LARGE_WIDTH);
 
@@ -132,9 +135,9 @@
 	}
 
 #if (READER_SLIDER == TRUE)
-    ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:pageThumbView.tag]];
-    [oldthumb makeTransparent];
-    [tthumb makeOpaque];
+	ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:pageThumbView.tag]];
+	[oldthumb makeTransparent];
+	[tthumb makeOpaque];
 #endif
 
 	if (page != pageThumbView.tag) // Only if page number changed
@@ -157,10 +160,6 @@
 
 - (void)updatePageNumberText:(NSInteger)page
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (page != pageNumberLabel.tag) // Only if page number changed
 	{
 		NSInteger pages = [document.pageCount integerValue]; // Total pages
@@ -177,11 +176,7 @@
 
 - (id)initWithFrame:(CGRect)frame document:(ReaderDocument *)object
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	assert(object != nil); // Check
+	assert(object != nil); // Must have a valid ReaderDocument
 
 	if ((self = [super initWithFrame:frame]))
 	{
@@ -200,7 +195,7 @@
 
 		ReaderPagebarShadow *shadowView = [[ReaderPagebarShadow alloc] initWithFrame:shadowRect];
 
-		[self addSubview:shadowView];  // Add the shadow to the view
+		[self addSubview:shadowView]; // Add the shadow to the view
 
 		CGFloat numberY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE));
 		CGFloat numberX = ((self.bounds.size.width - PAGE_NUMBER_WIDTH) / 2.0f);
@@ -269,48 +264,13 @@
 
 - (void)removeFromSuperview
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	[trackTimer invalidate]; [enableTimer invalidate];
 
 	[super removeFromSuperview];
 }
 
-- (void)dealloc
-{
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	trackTimer = nil;
-
-	enableTimer = nil;
-
-#if (READER_SLIDER == TRUE)
-    scrollView = nil;
-#else
-	[trackControl release], trackControl = nil;
-#endif
-	miniThumbViews = nil;
-
-	pageNumberLabel = nil;
-
-	pageNumberView = nil;
-
-	pageThumbView = nil;
-
-	document = nil;
-
-}
-
 - (void)layoutSubviews
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-    
 #if (READER_SLIDER == TRUE)
     float THUMB_SMALL_WIDTH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_WIDTH_PHONE : THUMB_SMALL_WIDTH_PAD;
     float THUMB_SMALL_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_HEIGHT_PHONE : THUMB_SMALL_HEIGHT_PAD;
@@ -425,8 +385,6 @@
 #else
 			[trackControl addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
 #endif
-            
-			smallThumbView = nil; // Cleanup
 		}
 		else // Resue existing small thumb view for the page number
 		{
@@ -451,10 +409,6 @@
 
 - (void)updatePagebarViews
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-    
 	NSInteger page = [document.pageNumber integerValue]; // #
     
 	[self updatePageNumberText:page]; // Update page number text
@@ -464,10 +418,6 @@
 
 - (void)updatePagebar
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (self.hidden == NO) // Only if visible
 	{
 		[self updatePagebarViews]; // Update views
@@ -476,10 +426,6 @@
 
 - (void)hidePagebar
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (self.hidden == NO) // Only if visible
 	{
 		[UIView animateWithDuration:0.5 delay:0.0
@@ -498,10 +444,6 @@
 
 - (void)showPagebar
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (self.hidden == YES) // Only if hidden
 	{
 		[self updatePagebarViews]; // Update views first
@@ -522,11 +464,7 @@
 
 - (void)trackTimerFired:(NSTimer *)timer
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[trackTimer invalidate]; trackTimer = nil; // Cleanup
+	[trackTimer invalidate]; trackTimer = nil; // Cleanup timer
 #if (READER_SLIDER == TRUE)
 #else
 	if (trackControl.tag != [document.pageNumber integerValue]) // Only if different
@@ -538,11 +476,7 @@
 
 - (void)enableTimerFired:(NSTimer *)timer
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
-	[enableTimer invalidate]; enableTimer = nil; // Cleanup
+	[enableTimer invalidate]; enableTimer = nil; // Cleanup timer
 #if (READER_SLIDER == TRUE)
 #else
 	trackControl.userInteractionEnabled = YES; // Enable track control interaction
@@ -551,32 +485,20 @@
 
 - (void)restartTrackTimer
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (trackTimer != nil) { [trackTimer invalidate]; trackTimer = nil; } // Invalidate and release previous timer
 
-	trackTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(trackTimerFired:) userInfo:nil repeats:NO];
+	trackTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(trackTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (void)startEnableTimer
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (enableTimer != nil) { [enableTimer invalidate]; enableTimer = nil; } // Invalidate and release previous timer
 
-	enableTimer = [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(enableTimerFired:) userInfo:nil repeats:NO];
+	enableTimer = [NSTimer scheduledTimerWithTimeInterval:0.25 target:self selector:@selector(enableTimerFired:) userInfo:nil repeats:NO];
 }
 
 - (NSInteger)trackViewPageNumber:(ReaderTrackControl *)trackView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGFloat controlWidth = trackView.bounds.size.width; // View width
 
 	CGFloat stride = (controlWidth / [document.pageCount integerValue]);
@@ -588,10 +510,6 @@
 
 - (void)trackViewTouchDown:(ReaderTrackControl *)trackView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-    
 	NSInteger page = [self trackViewPageNumber:trackView]; // Page
 
 	if (page != [document.pageNumber integerValue]) // Only if different
@@ -608,10 +526,6 @@
 
 - (void)trackViewValueChanged:(ReaderTrackControl *)trackView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	NSInteger page = [self trackViewPageNumber:trackView]; // Page
 
 	if (page != trackView.tag) // Only if the page number has changed
@@ -628,10 +542,6 @@
 
 - (void)trackViewTouchUp:(ReaderTrackControl *)trackView
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	[trackTimer invalidate]; trackTimer = nil; // Cleanup
 
 	if (trackView.tag != [document.pageNumber integerValue]) // Only if different
@@ -731,6 +641,9 @@
 //
 
 @implementation ReaderTrackControl
+{
+	CGFloat _value;
+}
 
 #pragma mark Properties
 
@@ -740,10 +653,6 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if ((self = [super initWithFrame:frame]))
 	{
 		self.autoresizesSubviews = NO;
@@ -756,13 +665,8 @@
 	return self;
 }
 
-
 - (CGFloat)limitValue:(CGFloat)valueX
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGFloat minX = self.bounds.origin.x; // 0.0f;
 	CGFloat maxX = (self.bounds.size.width - 1.0f);
 
@@ -776,10 +680,6 @@
 
 - (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGPoint point = [touch locationInView:self]; // Touch point
 
 	_value = [self limitValue:point.x]; // Limit control value
@@ -789,10 +689,6 @@
 
 - (BOOL)continueTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if (self.touchInside == YES) // Only if inside the control
 	{
 		CGPoint point = [touch locationInView:touch.view]; // Touch point
@@ -810,10 +706,6 @@
 
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	CGPoint point = [touch locationInView:self]; // Touch point
 
 	_value = [self limitValue:point.x]; // Limit control value
@@ -829,27 +721,15 @@
 
 @implementation ReaderPagebarThumb
 
-//#pragma mark Properties
-
-//@synthesize ;
-
 #pragma mark ReaderPagebarThumb instance methods
 
 - (id)initWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return [self initWithFrame:frame small:NO];
 }
 
 - (id)initWithFrame:(CGRect)frame small:(BOOL)small
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if ((self = [super initWithFrame:frame])) // Superclass init
 	{
         CGFloat value = (small ? 0.1f : 0.2f); // Size based alpha value
@@ -887,7 +767,6 @@
 
 }
 
-
 @end
 
 #pragma mark -
@@ -898,18 +777,10 @@
 
 @implementation ReaderPagebarShadow
 
-//#pragma mark Properties
-
-//@synthesize ;
-
 #pragma mark ReaderPagebarShadow class methods
 
 + (Class)layerClass
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	return [CAGradientLayer class];
 }
 
@@ -917,10 +788,6 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-#ifdef DEBUGX
-	NSLog(@"%s", __FUNCTION__);
-#endif
-
 	if ((self = [super initWithFrame:frame]))
 	{
 		self.autoresizesSubviews = NO;
@@ -937,6 +804,5 @@
 
 	return self;
 }
-
 
 @end
