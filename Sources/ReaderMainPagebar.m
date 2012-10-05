@@ -327,7 +327,7 @@
     UISlider *slider = (UISlider*)sender;
     CGFloat value = slider.value;
     NSUInteger page = [self pageFromSliderValue:value];
-    NSLog(@"%s:%lf - > %d", __func__, value, page);
+    //NSLog(@"%s:%lf - > %d", __func__, value, page);
     [self updatePageNumberText:page];
     
     [thumbView setHidden:FALSE];
@@ -340,7 +340,7 @@
     UISlider *slider = (UISlider*)sender;
     CGFloat value = slider.value;
     NSInteger page = [self pageFromSliderValue:value];
-    NSLog(@"%s:%lf - > %d", __func__, value, page);
+    //NSLog(@"%s:%lf - > %d", __func__, value, page);
     //[self updatePageThumbView:page];
     [delegate pagebar:self gotoPage:page];
     
