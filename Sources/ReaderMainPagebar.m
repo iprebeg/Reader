@@ -259,10 +259,22 @@
         [scrollView addGestureRecognizer:tapGesture]; 
         [self addSubview:scrollView];
 #elif (READER_SLIDER == TRUE)
+        
         sliderView = [[UISlider alloc] initWithFrame:self.bounds];
+        sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        
         [sliderView addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
         [sliderView addTarget:self action:@selector(sliderReleased:) forControlEvents:UIControlEventTouchUpInside];
-        sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        
+        //[sliderView setMinimumTrackImage:[UIImage imageNamed:@"Reader-Button-H"] forState:UIControlStateNormal];
+        //[sliderView setMinimumTrackImage:[UIImage imageNamed:@"Default-568"] forState:UIControlStateNormal];
+        //[sliderView setMaximumTrackImage:[UIImage imageNamed:@"Reader-Button-N"] forState:UIControlStateNormal];
+        //[sliderView setThumbImage:[UIImage imageNamed:@"Reader-Email"] forState:UIControlStateNormal];
+        
+        [sliderView setMinimumTrackTintColor:[UIColor darkGrayColor]];
+        [sliderView setMaximumTrackTintColor:[UIColor lightGrayColor]];
+        //[sliderView setThumbImage:[UIImage imageNamed:@"Reader-Email"] forState:UIControlStateNormal];
+        
         [self addSubview:sliderView];
         
         thumbView = [[UIView alloc] initWithFrame:CGRectMake(100, -200, 130, 130)];
