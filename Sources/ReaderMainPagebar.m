@@ -34,8 +34,14 @@
 {
 	ReaderDocument *document;
 
+#if (READER_SCROLL == TRUE)
+    UIScrollView *scrollView;
+#elif (READER_SLIDER == TRUE)
+    UISlider *sliderView;
+#else
 	ReaderTrackControl *trackControl;
-
+#endif
+    
 	NSMutableDictionary *miniThumbViews;
 
 	ReaderPagebarThumb *pageThumbView;
@@ -46,13 +52,11 @@
 
 	NSTimer *enableTimer;
 	NSTimer *trackTimer;
-    
-    UIScrollView *scrollView;
 }
 
 #pragma mark Constants
 
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
 #define THUMB_FRAC 1.7036688617121354f
 #define THUMB_SMALL_GAP 3
 #define THUMB_SMALL_WIDTH_PAD 212 //140
@@ -103,7 +107,7 @@
 {
 	NSInteger pages = [document.pageCount integerValue];
             
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
 	ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
         
 	CGPoint point = [tthumb center];
@@ -115,8 +119,10 @@
 
 	if (pages > 1) // Only update frame if more than one page
 	{
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
 		CGFloat controlWidth = scrollView.bounds.size.width;
+#elif (READER_SLIDER == TRUE)
+        CGFloat controlWidth = sliderView.bounds.size.width;
 #else
 		CGFloat controlWidth = trackControl.bounds.size.width;
 #endif
@@ -136,7 +142,7 @@
 		}
 	}
 
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
 	ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:pageThumbView.tag]];
 	[oldthumb makeTransparent];
 	[tthumb makeOpaque];
@@ -236,13 +242,18 @@
 		[self addSubview:pageNumberView]; // Add page numbers display view
 
         
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
         scrollView = [[ReaderPreview alloc] initWithFrame:frame];
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
         //tapGesture.numberOfTouchesRequired = 1; tapGesture.numberOfTapsRequired = 1; tapGesture.delegate = self;
         [scrollView addGestureRecognizer:tapGesture]; 
         [self addSubview:scrollView];
+#elif (READER_SLIDER == TRUE)
+        sliderView = [[UISlider alloc] initWithFrame:self.bounds];
+        [sliderView addTarget:self action:@selector(sliderChanged:) forControlEvents:UIControlEventValueChanged];
+        sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+        [self addSubview:sliderView];
 #else
 		trackControl = [[ReaderTrackControl alloc] initWithFrame:self.bounds]; // Track control view
 
@@ -264,6 +275,15 @@
 	return self;
 }
 
+
+
+#if (READER_SLIDER == TRUE)
+- (void) sliderChanged:(id)sender
+{
+    NSLog(@"%s", __func__);
+}
+#endif
+
 - (void)removeFromSuperview
 {
 	[trackTimer invalidate]; [enableTimer invalidate];
@@ -273,7 +293,7 @@
 
 - (void)layoutSubviews
 {
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
     float THUMB_SMALL_WIDTH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_WIDTH_PHONE : THUMB_SMALL_WIDTH_PAD;
     float THUMB_SMALL_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_HEIGHT_PHONE : THUMB_SMALL_HEIGHT_PAD;
 #endif
@@ -284,7 +304,7 @@
     
     NSInteger pages = [document.pageCount integerValue]; // Pages
     
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
     NSInteger thumbs = pages;
 #else
     NSInteger thumbs = (controlRect.size.width / thumbWidth);
@@ -300,7 +320,7 @@
 
 	NSInteger X = (widthDelta / 2.0f); controlRect.origin.x = X;
 
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
     CGFloat width = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP) * pages;
 
     if (width < self.bounds.size.width) {
@@ -308,6 +328,7 @@
     }
 
     scrollView.contentSize = CGSizeMake(width, controlRect.size.height);
+#elif (READER_SLIDER == TRUE)
 #else
 	trackControl.frame = controlRect; // Update track control frame
 #endif
@@ -327,9 +348,14 @@
 
         NSInteger pageNum = [document.pageNumber integerValue];
 
-#if (READER_SLIDER == TRUE)        
+#if (READER_SCROLL == TRUE)
         if (pageThumbView.tag != pageNum)
         { 
+            [self updatePageThumbView:pageNum]; // Update page thumb view
+        }
+#elif (READER_SLIDER == TRUE)
+        if (pageThumbView.tag != pageNum)
+        {
             [self updatePageThumbView:pageNum]; // Update page thumb view
         }
 #else
@@ -343,13 +369,14 @@
 
 	CGFloat stride = ((CGFloat)pages / (CGFloat)strideThumbs); // Page stride
 
-	//CGFloat heightDelta = (controlRect.size.height - THUMB_SMALL_HEIGHT);
-
-	//NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Initial X, Y
-
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
+#elif (READER_SLIDER == TRUE)
 #else
-	CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
+    CGFloat heightDelta = (controlRect.size.height - THUMB_SMALL_HEIGHT);
+    
+	NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Initial X, Y
+	
+    CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
 #endif
    
 	NSMutableDictionary *thumbsToHide = [miniThumbViews mutableCopy];
@@ -362,7 +389,10 @@
 
 		ReaderPagebarThumb *smallThumbView = [miniThumbViews objectForKey:key]; // Thumb view
                 
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
+        CGFloat yOrigin = thumb * (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
+        CGRect thumbRect = CGRectMake(yOrigin, 0, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
+#elif (READER_SLIDER == TRUE)
         CGFloat yOrigin = thumb * (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
         CGRect thumbRect = CGRectMake(yOrigin, 0, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
 #else
@@ -381,9 +411,10 @@
 
 			if ([image isKindOfClass:[UIImage class]]) [smallThumbView showImage:image]; // Use thumb image from cache
             
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
             [scrollView addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
             smallThumbView.tag = page;
+#elif (READER_SLIDER == TRUE)
 #else
 			[trackControl addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
 #endif
@@ -467,7 +498,8 @@
 - (void)trackTimerFired:(NSTimer *)timer
 {
 	[trackTimer invalidate]; trackTimer = nil; // Cleanup timer
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
+#elif (READER_SLIDER == TRUE)
 #else
 	if (trackControl.tag != [document.pageNumber integerValue]) // Only if different
 	{
@@ -479,7 +511,8 @@
 - (void)enableTimerFired:(NSTimer *)timer
 {
 	[enableTimer invalidate]; enableTimer = nil; // Cleanup timer
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
+#elif (READER_SLIDER == TRUE)
 #else
 	trackControl.userInteractionEnabled = YES; // Enable track control interaction
 #endif
