@@ -67,11 +67,13 @@
 
 #define TOOLBAR_HEIGHT 44.0f
 
-#if (READER_SLIDER == TRUE)
-#define PAGEBAR_HEIGHT_PAD 128.0f
-#define PAGEBAR_HEIGHT_PHONE 53.0f
+#if (READER_SCROLL == TRUE)
+    #define PAGEBAR_HEIGHT_PAD 128.0f
+    #define PAGEBAR_HEIGHT_PHONE 53.0f
+#elif (READER_SLIDER == TRUE)
+    #define PAGEBAR_HEIGHT 30.0f
 #else
-#define PAGEBAR_HEIGHT 48.0f
+    #define PAGEBAR_HEIGHT 48.0f
 #endif
 
 #define TAP_AREA_SIZE 48.0f
@@ -313,7 +315,7 @@
 
 - (void)viewDidLoad
 {
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
     float PAGEBAR_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? PAGEBAR_HEIGHT_PHONE : PAGEBAR_HEIGHT_PAD;
 #endif
 
@@ -555,7 +557,7 @@
 	NSLog(@"%s", __FUNCTION__);
 #endif
     
-#if (READER_SLIDER == TRUE)
+#if (READER_SCROLL == TRUE)
     float PAGEBAR_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? PAGEBAR_HEIGHT_PHONE : PAGEBAR_HEIGHT_PAD;
 #endif
 
