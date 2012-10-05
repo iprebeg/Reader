@@ -38,6 +38,7 @@
     UIScrollView *scrollView;
 #elif (READER_SLIDER == TRUE)
     UISlider *sliderView;
+    UIView *thumbView;
 #else
 	ReaderTrackControl *trackControl;
 #endif
@@ -105,7 +106,7 @@
 
 - (void)updatePageThumbView:(NSInteger)page
 {
-	NSInteger pages = [document.pageCount integerValue];
+	
             
 #if (READER_SCROLL == TRUE)
 	ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
@@ -115,17 +116,32 @@
 	point.x = point.x - (self.frame.size.width / 2);
     
 	[scrollView setContentOffset:point animated:YES];
-#endif
+    
+    ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:scrollView.tag]];
+	[oldthumb makeTransparent];
+	[tthumb makeOpaque];
+    
+    if (page != scrollView.tag) {
+        scrollView.tag = page;
+    }
+#elif (READER_SLIDER == TRUE)
+    if (page != thumbView.tag)
+    {
+        ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
+        ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:thumbView.tag]];
+        
+        [thumbView addSubview:tthumb];
+        [oldthumb removeFromSuperview];
+        
+        thumbView.tag = page;
+    }
+#else
+    NSInteger pages = [document.pageCount integerValue];
 
 	if (pages > 1) // Only update frame if more than one page
 	{
-#if (READER_SCROLL == TRUE)
-		CGFloat controlWidth = scrollView.bounds.size.width;
-#elif (READER_SLIDER == TRUE)
-        CGFloat controlWidth = sliderView.bounds.size.width;
-#else
 		CGFloat controlWidth = trackControl.bounds.size.width;
-#endif
+        
 		CGFloat useableWidth = (controlWidth - THUMB_LARGE_WIDTH);
 
 		CGFloat stride = (useableWidth / (pages - 1)); // Page stride
@@ -142,28 +158,21 @@
 		}
 	}
 
-#if (READER_SCROLL == TRUE)
-	ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:pageThumbView.tag]];
-	[oldthumb makeTransparent];
-	[tthumb makeOpaque];
-#endif
-
-	if (page != pageThumbView.tag) // Only if page number changed
-	{        
+    if (page != pageThumbView.tag) // Only if page number changed
+	{
 		pageThumbView.tag = page; [pageThumbView reuse]; // Reuse the thumb view
-
-		CGSize size = CGSizeMake(THUMB_LARGE_WIDTH, THUMB_LARGE_HEIGHT); // Maximum thumb size
-
-		NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
-
-		ReaderThumbRequest *request = [ReaderThumbRequest newForView:pageThumbView fileURL:fileURL password:phrase guid:guid page:page size:size];
-
-		UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
-
-		UIImage *thumb = ([image isKindOfClass:[UIImage class]] ? image : nil); [pageThumbView showImage:thumb];
         
-
+		CGSize size = CGSizeMake(THUMB_LARGE_WIDTH, THUMB_LARGE_HEIGHT); // Maximum thumb size
+        
+		NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
+        
+		ReaderThumbRequest *request = [ReaderThumbRequest newForView:pageThumbView fileURL:fileURL password:phrase guid:guid page:page size:size];
+        
+		UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
+        
+		UIImage *thumb = ([image isKindOfClass:[UIImage class]] ? image : nil); [pageThumbView showImage:thumb];
 	}
+#endif
 }
 
 - (void)updatePageNumberText:(NSInteger)page
@@ -255,6 +264,22 @@
         [sliderView addTarget:self action:@selector(sliderReleased:) forControlEvents:UIControlEventTouchUpInside];
         sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:sliderView];
+        
+        thumbView = [[UIView alloc] initWithFrame:CGRectMake(100, -200, 130, 130)];
+        
+        thumbView.autoresizesSubviews = NO;
+		thumbView.userInteractionEnabled = NO;
+		thumbView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+		thumbView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.4f];
+        
+        thumbView.layer.cornerRadius = 4.0f;
+		thumbView.layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
+		thumbView.layer.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.6f].CGColor;
+		thumbView.layer.shadowPath = [UIBezierPath bezierPathWithRect:thumbView.bounds].CGPath;
+		thumbView.layer.shadowRadius = 2.0f; thumbView.layer.shadowOpacity = 1.0f;
+        
+        [thumbView setHidden:TRUE];
+        [self addSubview:thumbView];
 #else
 		trackControl = [[ReaderTrackControl alloc] initWithFrame:self.bounds]; // Track control view
 
@@ -276,10 +301,7 @@
 	return self;
 }
 
-
-
 #if (READER_SLIDER == TRUE)
-
 - (NSInteger) pageFromSliderValue:(CGFloat)sliderValue
 {
     NSInteger pages = [document.pageCount integerValue];
@@ -295,6 +317,10 @@
     NSUInteger page = [self pageFromSliderValue:value];
     NSLog(@"%s:%lf - > %d", __func__, value, page);
     [self updatePageNumberText:page];
+    
+    [thumbView setHidden:FALSE];
+    
+    [self updatePageThumbView:page];
 }
 
 - (void) sliderReleased:(id)sender
@@ -304,6 +330,9 @@
     NSInteger page = [self pageFromSliderValue:value];
     NSLog(@"%s:%lf - > %d", __func__, value, page);
     //[self updatePageThumbView:page];
+    [delegate pagebar:self gotoPage:page];
+    
+    [thumbView setHidden:true];
 }
 #endif
 
@@ -315,6 +344,258 @@
 }
 
 - (void)layoutSubviews
+{
+#if (READER_SCROLL == TRUE)
+    float THUMB_SMALL_WIDTH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_WIDTH_PHONE : THUMB_SMALL_WIDTH_PAD;
+    float THUMB_SMALL_HEIGHT = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_HEIGHT_PHONE : THUMB_SMALL_HEIGHT_PAD;
+    
+    CGRect controlRect = CGRectInset(self.bounds, 4.0f, 0.0f);
+    
+	CGFloat thumbWidth = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
+    
+    NSInteger pages = [document.pageCount integerValue]; // Pages
+    
+    NSInteger thumbs = pages;
+
+	if (thumbs > pages) thumbs = pages; // No more than total pages
+    
+	CGFloat controlWidth = ((thumbs * thumbWidth) - THUMB_SMALL_GAP);
+    
+	controlRect.size.width = controlWidth; // Update control width
+    
+	CGFloat widthDelta = (self.bounds.size.width - controlWidth);
+    
+	NSInteger X = (widthDelta / 2.0f); controlRect.origin.x = X;
+
+    CGFloat width = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP) * pages;
+    
+    if (width < self.bounds.size.width) {
+        width = self.bounds.size.width;
+    }
+    
+    scrollView.contentSize = CGSizeMake(width, controlRect.size.height);
+
+    if (pageThumbView == nil) // Create the page thumb view when needed
+	{
+		CGFloat heightDelta = (controlRect.size.height - THUMB_LARGE_HEIGHT);
+        
+		NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Thumb X, Y
+        
+		CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_LARGE_WIDTH, THUMB_LARGE_HEIGHT);
+        
+		pageThumbView = [[ReaderPagebarThumb alloc] initWithFrame:thumbRect]; // Create the thumb view
+        
+		pageThumbView.layer.zPosition = 1.0f; // Z position so that it sits on top of the small thumbs
+        
+        NSInteger pageNum = [document.pageNumber integerValue];
+
+        if (pageThumbView.tag != pageNum)
+        {
+            [self updatePageThumbView:pageNum]; // Update page thumb view
+        }
+        
+	}
+    
+    NSInteger strideThumbs = (thumbs - 1); if (strideThumbs < 1) strideThumbs = 1;
+    
+	CGFloat stride = ((CGFloat)pages / (CGFloat)strideThumbs); // Page stride
+    
+    NSMutableDictionary *thumbsToHide = [miniThumbViews mutableCopy];
+    
+	for (NSInteger thumb = 0; thumb < thumbs; thumb++) // Iterate through needed thumbs
+	{
+		NSInteger page = ((stride * thumb) + 1); if (page > pages) page = pages; // Page
+        
+		NSNumber *key = [NSNumber numberWithInteger:page]; // Page number key for thumb view
+        
+		ReaderPagebarThumb *smallThumbView = [miniThumbViews objectForKey:key]; // Thumb view
+        
+        CGFloat yOrigin = thumb * (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
+        CGRect thumbRect = CGRectMake(yOrigin, 0, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
+
+        if (smallThumbView == nil) // We need to create a new small thumb view for the page number
+		{
+			CGSize size = CGSizeMake(THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT); // Maximum thumb size
+            
+			NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
+            
+			smallThumbView = [[ReaderPagebarThumb alloc] initWithFrame:thumbRect small:YES]; // Create a small thumb view
+            
+			ReaderThumbRequest *thumbRequest = [ReaderThumbRequest newForView:smallThumbView fileURL:fileURL password:phrase guid:guid page:page size:size];
+            
+			UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:thumbRequest priority:NO]; // Request the thumb
+            
+			if ([image isKindOfClass:[UIImage class]]) [smallThumbView showImage:image]; // Use thumb image from cache
+
+            [scrollView addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
+            smallThumbView.tag = page;
+
+        }
+		else // Resue existing small thumb view for the page number
+		{
+			smallThumbView.hidden = NO; [thumbsToHide removeObjectForKey:key];
+            
+			if (CGRectEqualToRect(smallThumbView.frame, thumbRect) == false)
+			{
+				smallThumbView.frame = thumbRect; // Update thumb frame
+			}
+		}
+        
+		thumbRect.origin.x += thumbWidth; // Next thumb X position
+	}
+    
+	[thumbsToHide enumerateKeysAndObjectsUsingBlock: // Hide unused thumbs
+     ^(id key, id object, BOOL *stop)
+     {
+         ReaderPagebarThumb *thumb = object; thumb.hidden = YES;
+     }
+     ];
+#elif (READER_SLIDER == TRUE)
+    
+    NSInteger pages = [document.pageCount integerValue]; // Pages
+    
+    NSInteger thumbs = pages;
+    
+    CGFloat inset = 5;
+    
+    CGRect thumbRect = CGRectMake(inset, inset, thumbView.frame.size.width - 2*inset, thumbView.frame.size.height - 2*inset);
+    
+	for (NSInteger thumb = 0; thumb < thumbs; thumb++) // Iterate through needed thumbs
+	{
+		NSInteger page = thumb + 1; if (page > pages) page = pages; // Page
+        
+		NSNumber *key = [NSNumber numberWithInteger:page]; // Page number key for thumb view
+        
+		ReaderPagebarThumb *smallThumbView = [miniThumbViews objectForKey:key]; // Thumb view
+        
+		if (smallThumbView == nil) // We need to create a new small thumb view for the page number
+		{
+			CGSize size = CGSizeMake(thumbView.frame.size.width - 2*inset, thumbView.frame.size.height - 2*inset); // Maximum thumb size
+            
+			NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
+            
+			smallThumbView = [[ReaderPagebarThumb alloc] initWithFrame:thumbRect small:YES]; // Create a small thumb view
+            
+			ReaderThumbRequest *thumbRequest = [ReaderThumbRequest newForView:smallThumbView fileURL:fileURL password:phrase guid:guid page:page size:size];
+            
+			UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:thumbRequest priority:NO]; // Request the thumb
+            
+			if ([image isKindOfClass:[UIImage class]]) [smallThumbView showImage:image]; // Use thumb image from cache
+            
+            [miniThumbViews setObject:smallThumbView forKey:key];
+            smallThumbView.tag = page;
+		}
+		else // Resue existing small thumb view for the page number
+		{
+			smallThumbView.hidden = NO;
+            
+			if (CGRectEqualToRect(smallThumbView.frame, thumbRect) == false)
+			{
+				smallThumbView.frame = thumbRect; // Update thumb frame
+			}
+		}
+    }
+#else
+    ///////////
+    
+	CGRect controlRect = CGRectInset(self.bounds, 4.0f, 0.0f);
+    
+	CGFloat thumbWidth = (THUMB_SMALL_WIDTH + THUMB_SMALL_GAP);
+    
+    NSInteger pages = [document.pageCount integerValue]; // Pages
+    
+    NSInteger thumbs = (controlRect.size.width / thumbWidth);
+    
+	if (thumbs > pages) thumbs = pages; // No more than total pages
+    
+	CGFloat controlWidth = ((thumbs * thumbWidth) - THUMB_SMALL_GAP);
+    
+	controlRect.size.width = controlWidth; // Update control width
+    
+	CGFloat widthDelta = (self.bounds.size.width - controlWidth);
+    
+	NSInteger X = (widthDelta / 2.0f); controlRect.origin.x = X;
+    
+	trackControl.frame = controlRect; // Update track control frame
+    
+	if (pageThumbView == nil) // Create the page thumb view when needed
+	{
+		CGFloat heightDelta = (controlRect.size.height - THUMB_LARGE_HEIGHT);
+        
+		NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Thumb X, Y
+        
+		CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_LARGE_WIDTH, THUMB_LARGE_HEIGHT);
+        
+		pageThumbView = [[ReaderPagebarThumb alloc] initWithFrame:thumbRect]; // Create the thumb view
+        
+		pageThumbView.layer.zPosition = 1.0f; // Z position so that it sits on top of the small thumbs
+        
+        NSInteger pageNum = [document.pageNumber integerValue];
+        
+		[trackControl addSubview:pageThumbView]; // Add as the first subview of the track control
+        [self updatePageThumbView:pageNum]; // Update page thumb view
+	}
+    
+	NSInteger strideThumbs = (thumbs - 1); if (strideThumbs < 1) strideThumbs = 1;
+    
+	CGFloat stride = ((CGFloat)pages / (CGFloat)strideThumbs); // Page stride
+    
+    CGFloat heightDelta = (controlRect.size.height - THUMB_SMALL_HEIGHT);
+    
+	NSInteger thumbY = (heightDelta / 2.0f); NSInteger thumbX = 0; // Initial X, Y
+	
+    CGRect thumbRect = CGRectMake(thumbX, thumbY, THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT);
+    
+	NSMutableDictionary *thumbsToHide = [miniThumbViews mutableCopy];
+    
+	for (NSInteger thumb = 0; thumb < thumbs; thumb++) // Iterate through needed thumbs
+	{
+		NSInteger page = ((stride * thumb) + 1); if (page > pages) page = pages; // Page
+        
+		NSNumber *key = [NSNumber numberWithInteger:page]; // Page number key for thumb view
+        
+		ReaderPagebarThumb *smallThumbView = [miniThumbViews objectForKey:key]; // Thumb view
+        
+		if (smallThumbView == nil) // We need to create a new small thumb view for the page number
+		{
+			CGSize size = CGSizeMake(THUMB_SMALL_WIDTH, THUMB_SMALL_HEIGHT); // Maximum thumb size
+            
+			NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
+            
+			smallThumbView = [[ReaderPagebarThumb alloc] initWithFrame:thumbRect small:YES]; // Create a small thumb view
+            
+			ReaderThumbRequest *thumbRequest = [ReaderThumbRequest newForView:smallThumbView fileURL:fileURL password:phrase guid:guid page:page size:size];
+            
+			UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:thumbRequest priority:NO]; // Request the thumb
+            
+			if ([image isKindOfClass:[UIImage class]]) [smallThumbView showImage:image]; // Use thumb image from cache
+        
+			[trackControl addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
+		}
+		else // Resue existing small thumb view for the page number
+		{
+			smallThumbView.hidden = NO; [thumbsToHide removeObjectForKey:key];
+            
+			if (CGRectEqualToRect(smallThumbView.frame, thumbRect) == false)
+			{
+				smallThumbView.frame = thumbRect; // Update thumb frame
+			}
+		}
+        
+		thumbRect.origin.x += thumbWidth; // Next thumb X position
+	}
+    
+	[thumbsToHide enumerateKeysAndObjectsUsingBlock: // Hide unused thumbs
+     ^(id key, id object, BOOL *stop)
+     {
+         ReaderPagebarThumb *thumb = object; thumb.hidden = YES;
+     }
+     ];
+#endif
+}
+
+
+- (void)__layoutSubviews
 {
 #if (READER_SCROLL == TRUE)
     float THUMB_SMALL_WIDTH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? THUMB_SMALL_WIDTH_PHONE : THUMB_SMALL_WIDTH_PAD;
@@ -438,6 +719,7 @@
             [scrollView addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
             smallThumbView.tag = page;
 #elif (READER_SLIDER == TRUE)
+            [miniThumbViews setObject:smallThumbView forKey:key];
 #else
 			[trackControl addSubview:smallThumbView]; [miniThumbViews setObject:smallThumbView forKey:key];
 #endif
