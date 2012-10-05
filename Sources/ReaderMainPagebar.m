@@ -251,7 +251,8 @@
         [self addSubview:scrollView];
 #elif (READER_SLIDER == TRUE)
         sliderView = [[UISlider alloc] initWithFrame:self.bounds];
-        [sliderView addTarget:self action:@selector(sliderChanged:) forControlEvents:UIControlEventValueChanged];
+        [sliderView addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
+        [sliderView addTarget:self action:@selector(sliderReleased:) forControlEvents:UIControlEventTouchUpInside];
         sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:sliderView];
 #else
@@ -278,9 +279,31 @@
 
 
 #if (READER_SLIDER == TRUE)
-- (void) sliderChanged:(id)sender
+
+- (NSInteger) pageFromSliderValue:(CGFloat)sliderValue
 {
-    NSLog(@"%s", __func__);
+    NSInteger pages = [document.pageCount integerValue];
+    NSInteger page = (NSInteger) ceil((pages * sliderValue));
+    page = page < 1 ? 1 : page;
+    return page;
+}
+
+- (void) sliderValueChanged:(id)sender
+{
+    UISlider *slider = (UISlider*)sender;
+    CGFloat value = slider.value;
+    NSUInteger page = [self pageFromSliderValue:value];
+    NSLog(@"%s:%lf - > %d", __func__, value, page);
+    [self updatePageNumberText:page];
+}
+
+- (void) sliderReleased:(id)sender
+{
+    UISlider *slider = (UISlider*)sender;
+    CGFloat value = slider.value;
+    NSInteger page = [self pageFromSliderValue:value];
+    NSLog(@"%s:%lf - > %d", __func__, value, page);
+    //[self updatePageThumbView:page];
 }
 #endif
 
