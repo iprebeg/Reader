@@ -347,10 +347,21 @@
     UISlider *slider = (UISlider*)sender;
     CGFloat value = slider.value;
     NSUInteger page = [self pageFromSliderValue:value];
-    //NSLog(@"%s:%lf - > %d", __func__, value, page);
+
     [self updatePageNumberText:page];
     
-    [thumbView setHidden:FALSE];
+    if ([thumbView isHidden])
+    {
+        [thumbView setAlpha:0.0f];
+        [thumbView setHidden:FALSE];
+        
+        [UIView animateWithDuration:0.5f animations:^{
+            [thumbView setAlpha:1.0f];
+        } completion:^(BOOL finished) {
+            
+        }];
+    }
+    
     
     [self updatePageThumbView:page];
 }
@@ -360,11 +371,19 @@
     UISlider *slider = (UISlider*)sender;
     CGFloat value = slider.value;
     NSInteger page = [self pageFromSliderValue:value];
-    //NSLog(@"%s:%lf - > %d", __func__, value, page);
-    //[self updatePageThumbView:page];
+
     [delegate pagebar:self gotoPage:page];
     
-    [thumbView setHidden:true];
+    if (![thumbView isHidden])
+    {
+        [UIView animateWithDuration:0.5f animations:^{
+            [thumbView setAlpha:0.0f];
+        } completion:^(BOOL finished) {
+            [thumbView setHidden:true];
+            
+        }];
+    }
+    
 }
 #endif
 
