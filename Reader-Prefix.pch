@@ -29,6 +29,4 @@
 	#import <CoreGraphics/CoreGraphics.h>
 	#import <QuartzCore/QuartzCore.h>
 	#import <ImageIO/ImageIO.h>
-
-    #define READER_DEVICE_IS_IPAD ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad)
 #endif

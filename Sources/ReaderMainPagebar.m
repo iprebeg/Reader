@@ -258,7 +258,7 @@
         [self addSubview:scrollView];
 #elif (READER_SLIDER == TRUE)
         
-        CGFloat inset = READER_DEVICE_IS_IPAD ? 10 : 5;
+        CGFloat inset = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 10 : 5;
         CGRect sliderRect = CGRectMake(self.bounds.origin.x + inset, self.bounds.origin.y + inset, self.bounds.size.width - 2*inset, self.bounds.size.height - 2*inset);
         
         sliderView = [[UISlider alloc] initWithFrame:sliderRect];
@@ -278,9 +278,9 @@
         
         [self addSubview:sliderView];
         
-        CGFloat thumbW = READER_DEVICE_IS_IPAD ? 250 : 150;
-        CGFloat thumbH = READER_DEVICE_IS_IPAD ? 250 : 150;
-        CGFloat thumbSpace = READER_DEVICE_IS_IPAD ? 10 : 5;
+        CGFloat thumbW = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 : 150;
+        CGFloat thumbH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 : 150;
+        CGFloat thumbSpace = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 10 : 5;
         
         CGFloat thumbY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE + thumbH + thumbSpace));
 		CGFloat thumbX = ((self.bounds.size.width - thumbW) / 2.0f);
