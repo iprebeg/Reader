@@ -71,7 +71,7 @@
     #define PAGEBAR_HEIGHT_PAD 128.0f
     #define PAGEBAR_HEIGHT_PHONE 53.0f
 #elif (READER_SLIDER == TRUE)
-    #define PAGEBAR_HEIGHT 30.0f
+    #define PAGEBAR_HEIGHT 40.0f
 #else
     #define PAGEBAR_HEIGHT 48.0f
 #endif
