@@ -258,7 +258,10 @@
         [self addSubview:scrollView];
 #elif (READER_SLIDER == TRUE)
         
-        sliderView = [[UISlider alloc] initWithFrame:self.bounds];
+        CGFloat inset = READER_DEVICE_IS_IPAD ? 10 : 5;
+        CGRect sliderRect = CGRectMake(self.bounds.origin.x + inset, self.bounds.origin.y + inset, self.bounds.size.width - 2*inset, self.bounds.size.height - 2*inset);
+        
+        sliderView = [[UISlider alloc] initWithFrame:sliderRect];
         sliderView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         
         [sliderView addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
@@ -275,8 +278,15 @@
         
         [self addSubview:sliderView];
         
-        thumbView = [[UIView alloc] initWithFrame:CGRectMake(100, -200, 130, 130)];
+        CGFloat thumbW = READER_DEVICE_IS_IPAD ? 250 : 150;
+        CGFloat thumbH = READER_DEVICE_IS_IPAD ? 250 : 150;
+        CGFloat thumbSpace = READER_DEVICE_IS_IPAD ? 10 : 5;
         
+        CGFloat thumbY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE + thumbH + thumbSpace));
+		CGFloat thumbX = ((self.bounds.size.width - thumbW) / 2.0f);
+		CGRect thumbRect = CGRectMake(thumbX, thumbY, thumbW, thumbH);
+        
+        thumbView = [[UIView alloc] initWithFrame:thumbRect];
         thumbView.autoresizesSubviews = NO;
 		thumbView.userInteractionEnabled = NO;
 		thumbView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
@@ -546,8 +556,8 @@
 			}
 		}
     }
+
 #else
-    ///////////
     
 	CGRect controlRect = CGRectInset(self.bounds, 4.0f, 0.0f);
     
