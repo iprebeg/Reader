@@ -132,6 +132,14 @@
         [oldthumb removeFromSuperview];
         
         thumbView.tag = page;
+        
+        NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
+        
+        ReaderThumbRequest *request = [ReaderThumbRequest newForView:tthumb fileURL:fileURL password:phrase guid:guid page:page size:thumbView.frame.size];
+        
+        UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
+        
+        UIImage *thumb = ([image isKindOfClass:[UIImage class]] ? image : nil); [tthumb showImage:thumb];
     }
 #else
     NSInteger pages = [document.pageCount integerValue];
