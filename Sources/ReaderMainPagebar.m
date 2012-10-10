@@ -39,6 +39,8 @@
 #elif (READER_SLIDER == TRUE)
     UISlider *sliderView;
     UIView *thumbView;
+    ReaderThumbView *thumb1;
+    ReaderThumbView *thumb2;
 #else
 	ReaderTrackControl *trackControl;
 #endif
@@ -125,21 +127,34 @@
 #elif (READER_SLIDER == TRUE)
     if (page != thumbView.tag)
     {
-        ReaderPagebarThumb *tthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:page]];
-        ReaderPagebarThumb *oldthumb = [miniThumbViews objectForKey:[NSNumber numberWithInteger:thumbView.tag]];
-        
-        [thumbView addSubview:tthumb];
-        [oldthumb removeFromSuperview];
-        
-        thumbView.tag = page;
+        NSInteger pages = [document.pageCount integerValue];
         
         NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
         
-        ReaderThumbRequest *request = [ReaderThumbRequest newForView:tthumb fileURL:fileURL password:phrase guid:guid page:page size:thumbView.frame.size];
+        ReaderThumbRequest *request = [ReaderThumbRequest newForView:thumb1 fileURL:fileURL password:phrase guid:guid page:page size:thumb1.frame.size];
         
         UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
         
-        UIImage *thumb = ([image isKindOfClass:[UIImage class]] ? image : nil); [tthumb showImage:thumb];
+        UIImage *thumb_1 = ([image isKindOfClass:[UIImage class]] ? image : nil); [thumb1 showImage:thumb_1];
+      
+        if (page + 1 <= pages)
+        {
+            thumb2.hidden = false;
+        
+            NSInteger page2 = page+1;
+            
+            ReaderThumbRequest *request2 = [ReaderThumbRequest newForView:thumb2 fileURL:fileURL password:phrase guid:guid page:page2 size:thumb2.frame.size];
+            
+            UIImage *image2 = [[ReaderThumbCache sharedInstance] thumbRequest:request2 priority:YES]; // Request the thumb
+            
+            UIImage *thumb_2 = ([image2 isKindOfClass:[UIImage class]] ? image2 : nil); [thumb2 showImage:thumb_2];
+        }
+        else {
+            thumb2.hidden = true;
+        }
+
+        thumbView.tag = page;
+        
     }
 #else
     NSInteger pages = [document.pageCount integerValue];
@@ -286,7 +301,7 @@
         
         [self addSubview:sliderView];
         
-        CGFloat thumbW = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 : 150;
+        CGFloat thumbW = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 500 : 250;
         CGFloat thumbH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 : 150;
         CGFloat thumbSpace = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 10 : 5;
         
@@ -298,13 +313,21 @@
         thumbView.autoresizesSubviews = NO;
 		thumbView.userInteractionEnabled = NO;
 		thumbView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-		thumbView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.4f];
+		thumbView.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.7f];
         
         thumbView.layer.cornerRadius = 4.0f;
 		thumbView.layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
 		thumbView.layer.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.6f].CGColor;
 		thumbView.layer.shadowPath = [UIBezierPath bezierPathWithRect:thumbView.bounds].CGPath;
 		thumbView.layer.shadowRadius = 2.0f; thumbView.layer.shadowOpacity = 1.0f;
+        
+        CGRect t1Rect = CGRectMake(0, 0, thumbW / 2.0f, thumbH);
+        CGRect t2Rect = CGRectMake(thumbW / 2.0f, 0, thumbW / 2.0f, thumbH);
+        thumb1 = [[ReaderPagebarThumb alloc] initWithFrame:t1Rect small:YES];
+        thumb2 = [[ReaderPagebarThumb alloc] initWithFrame:t2Rect small:YES];
+        
+        [thumbView addSubview:thumb1];
+        [thumbView addSubview:thumb2];
         
         [thumbView setHidden:TRUE];
         [self addSubview:thumbView];
