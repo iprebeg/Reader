@@ -41,6 +41,8 @@
     UIView *thumbView;
     ReaderThumbView *thumb1;
     ReaderThumbView *thumb2;
+    UILabel *pageNumber1;
+    UILabel *pageNumber2;
 #else
 	ReaderTrackControl *trackControl;
 #endif
@@ -125,10 +127,10 @@
         scrollView.tag = page;
     }
 #elif (READER_SLIDER == TRUE)
+    NSInteger pages = [document.pageCount integerValue];
+    
     if (page != thumbView.tag)
     {
-        NSInteger pages = [document.pageCount integerValue];
-        
         NSURL *fileURL = document.fileURL; NSString *guid = document.guid; NSString *phrase = document.password;
         
         ReaderThumbRequest *request = [ReaderThumbRequest newForView:thumb1 fileURL:fileURL password:phrase guid:guid page:page size:thumb1.frame.size];
@@ -136,6 +138,8 @@
         UIImage *image = [[ReaderThumbCache sharedInstance] thumbRequest:request priority:YES]; // Request the thumb
         
         UIImage *thumb_1 = ([image isKindOfClass:[UIImage class]] ? image : nil); [thumb1 showImage:thumb_1];
+        
+        [pageNumber1 setText:[NSString stringWithFormat:@"%d", page]];
       
         if (page + 1 <= pages)
         {
@@ -148,9 +152,11 @@
             UIImage *image2 = [[ReaderThumbCache sharedInstance] thumbRequest:request2 priority:YES]; // Request the thumb
             
             UIImage *thumb_2 = ([image2 isKindOfClass:[UIImage class]] ? image2 : nil); [thumb2 showImage:thumb_2];
+            [pageNumber2 setText:[NSString stringWithFormat:@"%d", page+1]];
         }
         else {
             thumb2.hidden = true;
+            [pageNumber2 setText:@""];
         }
 
         thumbView.tag = page;
@@ -234,7 +240,7 @@
 		ReaderPagebarShadow *shadowView = [[ReaderPagebarShadow alloc] initWithFrame:shadowRect];
 
 		[self addSubview:shadowView]; // Add the shadow to the view
-
+#if (READER_SLIDER != TRUE)
 		CGFloat numberY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE));
 		CGFloat numberX = ((self.bounds.size.width - PAGE_NUMBER_WIDTH) / 2.0f);
 		CGRect numberRect = CGRectMake(numberX, numberY, PAGE_NUMBER_WIDTH, PAGE_NUMBER_HEIGHT);
@@ -270,7 +276,7 @@
 		[pageNumberView addSubview:pageNumberLabel]; // Add label view
 
 		[self addSubview:pageNumberView]; // Add page numbers display view
-
+#endif
         
 #if (READER_SCROLL == TRUE)
         scrollView = [[ReaderPreview alloc] initWithFrame:frame];
@@ -290,22 +296,16 @@
         [sliderView addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
         [sliderView addTarget:self action:@selector(sliderReleased:) forControlEvents:UIControlEventTouchUpInside];
         
-        //[sliderView setMinimumTrackImage:[UIImage imageNamed:@"Reader-Button-H"] forState:UIControlStateNormal];
-        //[sliderView setMinimumTrackImage:[UIImage imageNamed:@"Default-568"] forState:UIControlStateNormal];
-        //[sliderView setMaximumTrackImage:[UIImage imageNamed:@"Reader-Button-N"] forState:UIControlStateNormal];
-        //[sliderView setThumbImage:[UIImage imageNamed:@"Reader-Email"] forState:UIControlStateNormal];
-        
         [sliderView setMinimumTrackTintColor:[UIColor darkGrayColor]];
         [sliderView setMaximumTrackTintColor:[UIColor lightGrayColor]];
-        //[sliderView setThumbImage:[UIImage imageNamed:@"Reader-Email"] forState:UIControlStateNormal];
         
         [self addSubview:sliderView];
         
         CGFloat thumbW = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 500 : 250;
-        CGFloat thumbH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 : 150;
+        CGFloat thumbH = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 250 + PAGE_NUMBER_HEIGHT : 150 + PAGE_NUMBER_HEIGHT;
         CGFloat thumbSpace = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) ? 10 : 5;
         
-        CGFloat thumbY = (0.0f - (PAGE_NUMBER_HEIGHT + PAGE_NUMBER_SPACE + thumbH + thumbSpace));
+        CGFloat thumbY = (0.0f - (PAGE_NUMBER_HEIGHT + thumbH + thumbSpace));
 		CGFloat thumbX = ((self.bounds.size.width - thumbW) / 2.0f);
 		CGRect thumbRect = CGRectMake(thumbX, thumbY, thumbW, thumbH);
         
@@ -321,13 +321,42 @@
 		thumbView.layer.shadowPath = [UIBezierPath bezierPathWithRect:thumbView.bounds].CGPath;
 		thumbView.layer.shadowRadius = 2.0f; thumbView.layer.shadowOpacity = 1.0f;
         
-        CGRect t1Rect = CGRectMake(0, 0, thumbW / 2.0f, thumbH);
-        CGRect t2Rect = CGRectMake(thumbW / 2.0f, 0, thumbW / 2.0f, thumbH);
+        CGRect t1Rect = CGRectMake(0, PAGE_NUMBER_HEIGHT, thumbW / 2.0f, thumbH - PAGE_NUMBER_HEIGHT);
+        CGRect t2Rect = CGRectMake(thumbW / 2.0f, PAGE_NUMBER_HEIGHT, thumbW / 2.0f, thumbH - PAGE_NUMBER_HEIGHT);
         thumb1 = [[ReaderPagebarThumb alloc] initWithFrame:t1Rect small:YES];
         thumb2 = [[ReaderPagebarThumb alloc] initWithFrame:t2Rect small:YES];
-        
         [thumbView addSubview:thumb1];
         [thumbView addSubview:thumb2];
+        
+        CGRect l1Rect = CGRectMake(0, 0, thumbW / 2.0f, PAGE_NUMBER_HEIGHT);
+        CGRect l2Rect = CGRectMake(thumbW / 2.0f, 0, thumbW / 2.0f, PAGE_NUMBER_HEIGHT);
+        pageNumber1 = [[UILabel alloc] initWithFrame:l1Rect];
+        pageNumber2 = [[UILabel alloc] initWithFrame:l2Rect];
+        
+        pageNumber1.autoresizesSubviews = NO;
+        pageNumber1.autoresizingMask = UIViewAutoresizingNone;
+        pageNumber1.textAlignment = UITextAlignmentCenter;
+        pageNumber1.backgroundColor = [UIColor clearColor];
+		pageNumber1.textColor = [UIColor whiteColor];
+		pageNumber1.font = [UIFont systemFontOfSize:16.0f];
+		pageNumber1.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		pageNumber1.shadowColor = [UIColor blackColor];
+		pageNumber1.adjustsFontSizeToFitWidth = YES;
+		pageNumber1.minimumFontSize = 12.0f;
+
+        pageNumber2.autoresizesSubviews = NO;
+        pageNumber2.autoresizingMask = UIViewAutoresizingNone;
+        pageNumber2.textAlignment = UITextAlignmentCenter;
+        pageNumber2.backgroundColor = [UIColor clearColor];
+		pageNumber2.textColor = [UIColor whiteColor];
+		pageNumber2.font = [UIFont systemFontOfSize:16.0f];
+		pageNumber2.shadowOffset = CGSizeMake(0.0f, 1.0f);
+		pageNumber2.shadowColor = [UIColor blackColor];
+		pageNumber2.adjustsFontSizeToFitWidth = YES;
+		pageNumber2.minimumFontSize = 12.0f;
+        
+        [thumbView addSubview:pageNumber1];
+        [thumbView addSubview:pageNumber2];
         
         [thumbView setHidden:TRUE];
         [self addSubview:thumbView];
