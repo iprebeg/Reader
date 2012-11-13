@@ -317,12 +317,12 @@
         
         thumbView.layer.cornerRadius = 4.0f;
 		thumbView.layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
-		thumbView.layer.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.6f].CGColor;
+		thumbView.layer.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.2f].CGColor;
 		thumbView.layer.shadowPath = [UIBezierPath bezierPathWithRect:thumbView.bounds].CGPath;
 		thumbView.layer.shadowRadius = 2.0f; thumbView.layer.shadowOpacity = 1.0f;
         
-        CGRect t1Rect = CGRectMake(0, PAGE_NUMBER_HEIGHT, thumbW / 2.0f, thumbH - PAGE_NUMBER_HEIGHT);
-        CGRect t2Rect = CGRectMake(thumbW / 2.0f, PAGE_NUMBER_HEIGHT, thumbW / 2.0f, thumbH - PAGE_NUMBER_HEIGHT);
+        CGRect t1Rect = CGRectMake(5, PAGE_NUMBER_HEIGHT, thumbW / 2.0f - 5, thumbH - PAGE_NUMBER_HEIGHT - 5);
+        CGRect t2Rect = CGRectMake(thumbW / 2.0f, PAGE_NUMBER_HEIGHT, thumbW / 2.0f - 5, thumbH - PAGE_NUMBER_HEIGHT - 5);
         thumb1 = [[ReaderPagebarThumb alloc] initWithFrame:t1Rect small:YES];
         thumb2 = [[ReaderPagebarThumb alloc] initWithFrame:t2Rect small:YES];
         [thumbView addSubview:thumb1];
@@ -432,7 +432,6 @@
         }];
     }
     
-    
     [self updatePageThumbView:page];
 }
 
@@ -446,14 +445,13 @@
     
     if (![thumbView isHidden])
     {
-        [UIView animateWithDuration:0.5f animations:^{
+        [UIView animateWithDuration:1.5f animations:^{
             [thumbView setAlpha:0.0f];
         } completion:^(BOOL finished) {
             [thumbView setHidden:true];
             
         }];
     }
-    
 }
 #endif
 
