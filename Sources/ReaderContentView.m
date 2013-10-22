@@ -3,7 +3,7 @@
 //	Reader v2.6.1
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -153,9 +153,7 @@ static inline CGFloat ZoomScaleThatFits(CGSize target, CGSize source)
 
 - (void)dealloc
 {
-//	[self removeObserver:self forKeyPath:@"frame" context:ReaderContentViewContext];
-
-	[self removeObserver:self forKeyPath:@"frame"]; // Maintain iOS 4.x compatability
+	[self removeObserver:self forKeyPath:@"frame" context:ReaderContentViewContext];
 }
 
 - (void)showPageThumb:(NSURL *)fileURL page:(NSInteger)page password:(NSString *)phrase guid:(NSString *)guid

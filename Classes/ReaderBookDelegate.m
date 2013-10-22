@@ -1,9 +1,9 @@
 //
 //	ReaderBookDelegate.m
-//	Reader v2.6.0
+//	Reader v2.7.0
 //
 //	Created by Julius Oklamcak on 2011-09-01.
-//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@
 {
 	mainWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds]; // Main application window
 
-	mainWindow.backgroundColor = [UIColor scrollViewTexturedBackgroundColor]; // Window background color
+	mainWindow.backgroundColor = [UIColor grayColor]; // Neutral gray window background color
 
 	NSString *phrase = nil; // Document password (for unlocking most encrypted PDF files)
 

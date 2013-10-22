@@ -1,6 +1,18 @@
 
 ## History
 
+2013-10-12: Version 2.7.1
+
+	- Changed 'unsafe_unretained' to 'weak'.
+
+2013-10-03: Version 2.7.0
+
+	- iOS 7 and Xcode 5.0 support.
+
+2013-06-04: Version 2.6.2
+
+	- Touch two UIButton, exclusiveTouch = NO. Not good. Fixed.
+
 2012-10-05: Version 2.6.1
 
 	- Greatly improved thumb operation cancel handling.

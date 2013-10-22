@@ -1,9 +1,9 @@
 //
 //	ThumbsMainToolbar.m
-//	Reader v2.6.0
+//	Reader v2.6.2
 //
 //	Created by Julius Oklamcak on 2011-09-01.
-//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -77,6 +77,7 @@
 		[doneButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 		doneButton.titleLabel.font = [UIFont systemFontOfSize:14.0f];
 		doneButton.autoresizingMask = UIViewAutoresizingNone;
+		doneButton.exclusiveTouch = YES;
 
 		[self addSubview:doneButton];
 
@@ -90,13 +91,16 @@
 		UIImage *bookmarkImage = [UIImage imageNamed:@"Reader-Mark-Y"];
 		NSArray *buttonItems = [NSArray arrayWithObjects:thumbsImage, bookmarkImage, nil];
 
+		BOOL useTint = [self respondsToSelector:@selector(tintColor)]; // iOS 7 and up
+
 		UISegmentedControl *showControl = [[UISegmentedControl alloc] initWithItems:buttonItems];
 
 		showControl.frame = CGRectMake(showControlX, BUTTON_Y, SHOW_CONTROL_WIDTH, BUTTON_HEIGHT);
+		showControl.tintColor = (useTint ? [UIColor blackColor] : [UIColor colorWithWhite:0.8f alpha:1.0f]);
 		showControl.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
 		showControl.segmentedControlStyle = UISegmentedControlStyleBar;
-		showControl.tintColor = [UIColor colorWithWhite:0.8f alpha:1.0f];
 		showControl.selectedSegmentIndex = 0; // Default segment index
+		showControl.exclusiveTouch = YES;
 
 		[showControl addTarget:self action:@selector(showControlTapped:) forControlEvents:UIControlEventValueChanged];
 
@@ -112,7 +116,7 @@
 
 			UILabel *titleLabel = [[UILabel alloc] initWithFrame:titleRect];
 
-			titleLabel.textAlignment = UITextAlignmentCenter;
+			titleLabel.textAlignment = NSTextAlignmentCenter;
 			titleLabel.font = [UIFont systemFontOfSize:19.0f];
 			titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 			titleLabel.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
@@ -121,7 +125,7 @@
 			titleLabel.backgroundColor = [UIColor clearColor];
 			titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
 			titleLabel.adjustsFontSizeToFitWidth = YES;
-			titleLabel.minimumFontSize = 14.0f;
+			titleLabel.minimumScaleFactor = 0.75f;
 			titleLabel.text = title;
 
 			[self addSubview:titleLabel]; 

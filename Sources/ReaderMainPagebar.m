@@ -1,9 +1,9 @@
 //
 //	ReaderMainPagebar.m
-//	Reader v2.6.1
+//	Reader v2.6.2
 //
 //	Created by Julius Oklamcak on 2011-09-01.
-//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -208,7 +208,7 @@
 	{
 		NSInteger pages = [document.pageCount integerValue]; // Total pages
 
-		NSString *format = NSLocalizedString(@"%d of %d", @"format"); // Format
+		NSString *format = NSLocalizedString(@"%i of %i", @"format"); // Format
 
 		NSString *number = [NSString stringWithFormat:format, page, pages]; // Text
 
@@ -264,14 +264,14 @@
 
 		pageNumberLabel.autoresizesSubviews = NO;
 		pageNumberLabel.autoresizingMask = UIViewAutoresizingNone;
-		pageNumberLabel.textAlignment = UITextAlignmentCenter;
+		pageNumberLabel.textAlignment = NSTextAlignmentCenter;
 		pageNumberLabel.backgroundColor = [UIColor clearColor];
 		pageNumberLabel.textColor = [UIColor whiteColor];
 		pageNumberLabel.font = [UIFont systemFontOfSize:16.0f];
 		pageNumberLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
 		pageNumberLabel.shadowColor = [UIColor blackColor];
 		pageNumberLabel.adjustsFontSizeToFitWidth = YES;
-		pageNumberLabel.minimumFontSize = 12.0f;
+		pageNumberLabel.minimumScaleFactor = 0.75f;
 
 		[pageNumberView addSubview:pageNumberLabel]; // Add label view
 
@@ -972,6 +972,7 @@
 		self.contentMode = UIViewContentModeRedraw;
 		self.autoresizingMask = UIViewAutoresizingNone;
 		self.backgroundColor = [UIColor clearColor];
+		self.exclusiveTouch = YES;
 	}
 
 	return self;

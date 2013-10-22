@@ -1,9 +1,9 @@
 //
 //	ReaderMainToolbar.m
-//	Reader v2.6.1
+//	Reader v2.6.2
 //
 //	Created by Julius Oklamcak on 2011-07-01.
-//	Copyright © 2011-2012 Julius Oklamcak. All rights reserved.
+//	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
 //
 //	Permission is hereby granted, free of charge, to any person obtaining a copy
 //	of this software and associated documentation files (the "Software"), to deal
@@ -95,6 +95,7 @@
 		[doneButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 		doneButton.titleLabel.font = [UIFont systemFontOfSize:14.0f];
 		doneButton.autoresizingMask = UIViewAutoresizingNone;
+		doneButton.exclusiveTouch = YES;
 
 		[self addSubview:doneButton]; leftButtonX += (DONE_BUTTON_WIDTH + BUTTON_SPACE);
 
@@ -112,6 +113,7 @@
 		[thumbsButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
 		[thumbsButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 		thumbsButton.autoresizingMask = UIViewAutoresizingNone;
+		thumbsButton.exclusiveTouch = YES;
 
 		[self addSubview:thumbsButton]; //leftButtonX += (THUMBS_BUTTON_WIDTH + BUTTON_SPACE);
 
@@ -137,6 +139,7 @@
 		[flagButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
 		[flagButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 		flagButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+		flagButton.exclusiveTouch = YES;
 
 		[self addSubview:flagButton]; titleWidth -= (MARK_BUTTON_WIDTH + BUTTON_SPACE);
 
@@ -165,6 +168,7 @@
 				[emailButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
 				[emailButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 				emailButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+				emailButton.exclusiveTouch = YES;
 
 				[self addSubview:emailButton]; titleWidth -= (EMAIL_BUTTON_WIDTH + BUTTON_SPACE);
 			}
@@ -190,6 +194,7 @@
 				[printButton setBackgroundImage:buttonH forState:UIControlStateHighlighted];
 				[printButton setBackgroundImage:buttonN forState:UIControlStateNormal];
 				printButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+				printButton.exclusiveTouch = YES;
 
 				[self addSubview:printButton]; titleWidth -= (PRINT_BUTTON_WIDTH + BUTTON_SPACE);
 			}
@@ -203,7 +208,7 @@
 
 			UILabel *titleLabel = [[UILabel alloc] initWithFrame:titleRect];
 
-			titleLabel.textAlignment = UITextAlignmentCenter;
+			titleLabel.textAlignment = NSTextAlignmentCenter;
 			titleLabel.font = [UIFont systemFontOfSize:19.0f];
 			titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 			titleLabel.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
@@ -212,8 +217,8 @@
 			titleLabel.backgroundColor = [UIColor clearColor];
 			titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
 			titleLabel.adjustsFontSizeToFitWidth = YES;
-			titleLabel.minimumFontSize = 14.0f;
-			titleLabel.text = object.title;
+			titleLabel.minimumScaleFactor = 0.75f;
+			titleLabel.text = [object.fileName stringByDeletingPathExtension];
 
 			[self addSubview:titleLabel]; 
 		}
