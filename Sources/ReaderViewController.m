@@ -1,6 +1,6 @@
 //
 //	ReaderViewController.m
-//	Reader v2.6.0
+//	Reader v2.7.2
 //
 //	Created by Julius Oklamcak on 2011-07-01.
 //	Copyright © 2011-2013 Julius Oklamcak. All rights reserved.
@@ -327,14 +327,15 @@
 
 	self.view.backgroundColor = [UIColor grayColor]; // Neutral gray
 
+<<<<<<< HEAD
 	CGRect viewRect = self.view.bounds; // View controller's view bounds
     
-    viewRect.size.height -= PAGEBAR_HEIGHT;
+  viewRect.size.height -= PAGEBAR_HEIGHT;
     
-    CGRect notFullRect = self.view.bounds;
-    notFullRect.size.height -= PAGEBAR_HEIGHT + TOOLBAR_HEIGHT;
-    notFullRect.origin.y = TOOLBAR_HEIGHT;
-    theScrollView = [[UIScrollView alloc] initWithFrame:notFullRect]; // All
+  CGRect notFullRect = self.view.bounds;
+  notFullRect.size.height -= PAGEBAR_HEIGHT + TOOLBAR_HEIGHT;
+  notFullRect.origin.y = TOOLBAR_HEIGHT;
+  theScrollView = [[UIScrollView alloc] initWithFrame:notFullRect]; // All
 
 	theScrollView.scrollsToTop = NO;
 	theScrollView.pagingEnabled = YES;
@@ -348,30 +349,46 @@
 	theScrollView.autoresizesSubviews = NO;
 	theScrollView.delegate = self;
 
-    theScrollView.autoresizesSubviews = YES;
-    
+  theScrollView.autoresizesSubviews = YES;
+ 
+  if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) // iOS 7+
+	{
+		if ([self prefersStatusBarHidden] == NO) // Visible status bar
+		{
+			CGRect statusBarRect = self.view.bounds; // Status bar frame
+			statusBarRect.size.height = STATUS_HEIGHT; // Default status height
+			fakeStatusBar = [[UIView alloc] initWithFrame:statusBarRect]; // UIView
+			fakeStatusBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+			fakeStatusBar.backgroundColor = [UIColor blackColor];
+			fakeStatusBar.contentMode = UIViewContentModeRedraw;
+			fakeStatusBar.userInteractionEnabled = NO;
+
+			scrollViewRect.origin.y += STATUS_HEIGHT; scrollViewRect.size.height -= STATUS_HEIGHT;
+		}
+	}
+   
+
 	[self.view addSubview:theScrollView];
 
-	CGRect toolbarRect = viewRect;
-	toolbarRect.size.height = TOOLBAR_HEIGHT;
-
-	mainToolbar = [[ReaderMainToolbar alloc] initWithFrame:toolbarRect document:document]; // At top
-
-	mainToolbar.delegate = self;
-
+	CGRect toolbarRect = scrollViewRect; // Toolbar frame
+	toolbarRect.size.height = TOOLBAR_HEIGHT; // Default toolbar height
+	mainToolbar = [[ReaderMainToolbar alloc] initWithFrame:toolbarRect document:document]; // ReaderMainToolbar
+	mainToolbar.delegate = self; // ReaderMainToolbarDelegate
 	[self.view addSubview:mainToolbar];
 
 	CGRect pagebarRect = viewRect;
 	pagebarRect.size.height = PAGEBAR_HEIGHT;
     
 	//pagebarRect.origin.y = (viewRect.size.height - PAGEBAR_HEIGHT);
-    pagebarRect.origin.y = (viewRect.size.height);
+  pagebarRect.origin.y = (viewRect.size.height);
     
 	mainPagebar = [[ReaderMainPagebar alloc] initWithFrame:pagebarRect document:document]; // At bottom
 
 	mainPagebar.delegate = self;
 
 	[self.view addSubview:mainPagebar];
+
+	if (fakeStatusBar != nil) [self.view addSubview:fakeStatusBar]; // Add status bar background view
 
 	UITapGestureRecognizer *singleTapOne = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
 	singleTapOne.numberOfTouchesRequired = 1; singleTapOne.numberOfTapsRequired = 1; singleTapOne.delegate = self;
