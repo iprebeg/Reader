@@ -327,7 +327,6 @@
 
 	self.view.backgroundColor = [UIColor grayColor]; // Neutral gray
 
-<<<<<<< HEAD
 	CGRect viewRect = self.view.bounds; // View controller's view bounds
     
   viewRect.size.height -= PAGEBAR_HEIGHT;
@@ -350,6 +349,8 @@
 	theScrollView.delegate = self;
 
   theScrollView.autoresizesSubviews = YES;
+ 
+  CGRect scrollViewRect = self.view.bounds; UIView *fakeStatusBar = nil;
  
   if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) // iOS 7+
 	{

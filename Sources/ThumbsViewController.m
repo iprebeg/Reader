@@ -98,7 +98,7 @@
 
 	NSString *toolbarTitle = document.title;
 	
-  if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) // iOS 7+
+	if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) // iOS 7+
 	{
 		if ([self prefersStatusBarHidden] == NO) // Visible status bar
 		{
