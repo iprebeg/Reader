@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.homepage = 'http://www.vfr.org/'
   s.author   = { 'Julius Oklamcak' => 'joklamcak@gmail.com' }
 
-  s.source   = { :git => 'https://github.com/iprebeg/Reader.git', :commit => '03ee9900884d1994d99a881c8c691d394c01f1fa' }
+  s.source   = { :git => 'https://github.com/iprebeg/Reader.git' }
 
   s.platform = :ios
 
