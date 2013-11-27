@@ -12,5 +12,4 @@ Pod::Spec.new do |s|
  s.resources = 'Graphics/Reader-*.png'
  s.frameworks = 'UIKit', 'Foundation', 'CoreGraphics', 'QuartzCore', 'ImageIO', 'MessageUI'
  s.requires_arc = true
->>>>>>> upstream/master
 end
